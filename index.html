@@ -5,30 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Ryu's interactive pixel RPG dialogue system." />
   <title>Ryu — Dialogue.System</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --ink:#2b2030;
-      --purple:#58416c;
-      --purple-hi:#7b5c96;
-      --purple-low:#44334f;
-      --yellow:#f2c65b;
+      --ink:#2a2030;
+      --ink-deep:#17111b;
+      --purple:#59446c;
+      --purple-hi:#80659a;
+      --purple-low:#42334d;
+      --yellow:#f0c45b;
       --yellow-hi:#ffe58b;
-      --yellow-low:#c58d45;
-      --sand:#c99369;
-      --cream:#ebd7af;
-      --cream-hi:#f8e9c9;
-      --teal:#3ec1ae;
-      --green:#62c56b;
-      --pink:#e95d83;
-      --blue:#48aac7;
-      --lilac:#9474c7;
-      --text-dark:#392b42;
+      --yellow-low:#be8444;
+      --cream:#ead4aa;
+      --cream-hi:#fff0cf;
+      --teal:#39bfa9;
+      --green:#62c46c;
+      --pink:#e75b82;
+      --blue:#48a9c6;
+      --lilac:#9475c8;
+      --text-dark:#392c42;
       --text-light:#fff0d3;
-      --radius-panel:20px;
-      --radius-control:14px;
+      --px:4px;
+      --corner:10px;
     }
 
     * { box-sizing:border-box; }
@@ -38,7 +40,7 @@
       width:100%;
       min-width:100%;
       min-height:100%;
-      background:#1e1723;
+      background:#1d1621;
     }
 
     body {
@@ -51,6 +53,7 @@
       font-family:"Pixelify Sans", monospace;
       color:var(--text-light);
       image-rendering:pixelated;
+      text-rendering:geometricPrecision;
     }
 
     button, a { font:inherit; }
@@ -69,12 +72,12 @@
       height:800px;
       overflow:hidden;
       background:var(--ink);
-      border:4px solid #17111b;
-      border-radius:24px;
+      border:var(--px) solid var(--ink-deep);
+      border-radius:12px;
       box-shadow:
-        inset 0 0 0 4px #4d3b55,
-        inset 0 0 0 8px #241b29,
-        12px 12px 0 rgba(0,0,0,.28);
+        inset 0 0 0 4px #4c3a54,
+        inset 0 0 0 8px #211926,
+        12px 12px 0 #100c13;
       transform-origin:top left;
     }
 
@@ -84,14 +87,14 @@
       inset:0;
       z-index:50;
       pointer-events:none;
-      border-radius:20px;
-      background:repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,.018) 0,
-        rgba(255,255,255,.018) 1px,
-        transparent 1px,
-        transparent 4px
-      );
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.025) 0,
+          rgba(255,255,255,.025) 2px,
+          transparent 2px,
+          transparent 6px
+        );
       mix-blend-mode:soft-light;
     }
 
@@ -105,8 +108,9 @@
       justify-content:space-between;
       background:#271d2c;
       border-bottom:5px solid #120e16;
-      border-radius:20px 20px 0 0;
-      box-shadow:inset 0 -3px 0 #4a3952;
+      box-shadow:
+        inset 0 -4px 0 #4a3952,
+        inset 0 4px 0 #35273d;
     }
 
     .brand,
@@ -116,6 +120,7 @@
       font-weight:700;
       letter-spacing:2px;
       white-space:nowrap;
+      text-shadow:3px 3px 0 #120e16;
     }
 
     .brand { font-size:31px; }
@@ -133,9 +138,9 @@
       justify-content:center;
       color:var(--text-light);
       background:var(--ink);
-      border:3px solid var(--yellow);
-      border-radius:var(--radius-control);
-      box-shadow:4px 4px 0 #120d16;
+      border:4px solid var(--yellow);
+      border-radius:8px;
+      box-shadow:6px 6px 0 #120d16;
       font-size:18px;
       font-weight:700;
       letter-spacing:1px;
@@ -151,8 +156,10 @@
       display:grid;
       grid-template-columns:118px 1260px;
       gap:22px;
-      background:linear-gradient(#55455e,#4a3b54);
-      border-radius:0 0 20px 20px;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.035) 4px,transparent 4px) 0 0/16px 16px,
+        linear-gradient(rgba(255,255,255,.025) 4px,transparent 4px) 0 0/16px 16px,
+        #4e3e58;
     }
 
     .sidebar {
@@ -161,11 +168,11 @@
       padding:78px 12px 54px;
       background:#33273b;
       border:4px solid #201825;
-      border-radius:var(--radius-panel);
+      border-radius:10px;
       box-shadow:
-        inset 0 0 0 4px #665276,
-        inset 0 0 0 8px #463650,
-        6px 6px 0 #241a2a;
+        inset 0 0 0 4px #655176,
+        inset 0 0 0 8px #45354f,
+        8px 8px 0 #211825;
       overflow:visible;
     }
 
@@ -177,11 +184,12 @@
       display:grid;
       place-items:center;
       background:var(--purple-low);
-      color:#a98bc1;
-      border:3px solid #211725;
-      border-radius:var(--radius-control);
-      box-shadow:inset 0 0 0 3px #6e5680,4px 4px 0 #1b151f;
+      color:#ad90c4;
+      border:4px solid #211725;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #6d5680,4px 4px 0 #1b151f;
       font-size:24px;
+      text-shadow:2px 2px 0 #251b2b;
     }
 
     .rail-cap.top { top:10px; }
@@ -202,30 +210,31 @@
       color:#cdbde2;
       background:#59456c;
       border:4px solid #211724;
-      border-radius:16px;
-      box-shadow:inset 0 0 0 4px #78638d,5px 5px 0 #211724;
-      transition:transform .08s linear,filter .08s linear;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #78638d,6px 6px 0 #211724;
+      transition:transform .06s steps(2,end),filter .06s steps(2,end);
     }
 
     .site-link:first-child {
       color:var(--ink);
       background:var(--yellow);
-      box-shadow:inset 0 0 0 4px var(--yellow-hi),5px 5px 0 #211724;
+      box-shadow:inset 0 0 0 4px var(--yellow-hi),6px 6px 0 #211724;
     }
 
     .site-link:hover,
     .site-link:focus-visible {
       outline:0;
       filter:brightness(1.08);
-      transform:translate(-2px,-2px);
+      transform:translate(-4px,-4px);
     }
 
-    .site-link:active { transform:translate(2px,2px); }
+    .site-link:active { transform:translate(4px,4px); }
 
     .site-link .glyph {
       font-size:30px;
       font-weight:700;
       line-height:1;
+      text-shadow:2px 2px 0 rgba(0,0,0,.2);
     }
 
     .main-area {
@@ -255,11 +264,12 @@
       background:var(--yellow);
       border:4px solid #231728;
       border-bottom:0;
-      border-radius:16px 16px 0 0;
-      box-shadow:inset 0 0 0 4px var(--yellow-hi);
+      border-radius:10px 10px 0 0;
+      box-shadow:inset 0 0 0 4px var(--yellow-hi),6px 0 0 #211724;
       font-size:24px;
       font-weight:700;
       letter-spacing:1px;
+      text-shadow:2px 2px 0 rgba(255,255,255,.22);
     }
 
     .window-actions {
@@ -277,15 +287,21 @@
       color:var(--cream);
       background:#59456d;
       border:4px solid #211724;
-      border-radius:16px;
-      box-shadow:inset 0 0 0 4px #765f89,4px 4px 0 #201724;
-      text-decoration:none;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #765f89,5px 5px 0 #201724;
       font-size:30px;
       cursor:pointer;
+      transition:transform .06s steps(2,end),filter .06s steps(2,end);
     }
 
     .window-btn:hover,
-    .window-btn:focus-visible { outline:0; filter:brightness(1.12); }
+    .window-btn:focus-visible {
+      outline:0;
+      filter:brightness(1.12);
+      transform:translate(-3px,-3px);
+    }
+
+    .window-btn:active { transform:translate(3px,3px); }
 
     .panel {
       position:absolute;
@@ -293,14 +309,19 @@
       top:60px;
       width:1260px;
       height:652px;
-      padding:24px 24px 22px;
-      background:var(--yellow);
+      padding:24px 42px;
+      display:grid;
+      grid-template-rows:285px 1fr;
+      gap:24px;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.08) 4px,transparent 4px) 0 0/24px 24px,
+        var(--yellow);
       border:5px solid #241a2b;
-      border-radius:24px;
+      border-radius:12px;
       box-shadow:
         inset 0 0 0 5px var(--yellow-hi),
         inset 0 0 0 10px var(--yellow-low),
-        7px 7px 0 #2d2134;
+        8px 8px 0 #2d2134;
     }
 
     .panel-bolt {
@@ -308,7 +329,7 @@
       width:23px;
       height:23px;
       border:3px solid #241a2b;
-      border-radius:50%;
+      border-radius:5px;
       background:#43354f;
       box-shadow:inset 4px 4px 0 #675475;
     }
@@ -317,17 +338,16 @@
     .panel-bolt.b { right:17px; top:18px; }
 
     .top-content {
-      height:285px;
+      min-height:0;
       display:grid;
       grid-template-columns:365px 1fr;
       gap:28px;
-      padding:10px 18px 0;
     }
 
     .portrait-wrap {
-      height:275px;
+      height:285px;
       display:grid;
-      grid-template-rows:225px 42px;
+      grid-template-rows:235px 42px;
       gap:8px;
     }
 
@@ -336,8 +356,17 @@
       overflow:hidden;
       background:#30263a;
       border:5px solid #312238;
-      border-radius:20px;
-      box-shadow:inset 0 0 0 5px #6b557b,5px 5px 0 #9f684b;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 5px #6b557b,6px 6px 0 #9f684b;
+    }
+
+    .portrait-frame::after {
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:3;
+      pointer-events:none;
+      box-shadow:inset 0 0 0 4px rgba(255,255,255,.06);
     }
 
     .scene-bg,
@@ -352,7 +381,7 @@
     .scene-bg {
       z-index:0;
       object-fit:cover;
-      background:linear-gradient(135deg,#2a2432,#4e3f59);
+      background:#42364b;
       opacity:.9;
     }
 
@@ -361,7 +390,7 @@
       object-fit:contain;
       transform:scale(1.32) translateY(7px);
       transform-origin:center bottom;
-      transition:opacity .08s linear,transform .12s linear;
+      transition:opacity .08s steps(2,end),transform .08s steps(2,end);
     }
 
     .character.switching { opacity:.2; transform:scale(1.27) translateY(7px); }
@@ -378,7 +407,7 @@
       color:var(--text-dark);
       background:#5b4470;
       border:4px solid #2c2032;
-      border-radius:var(--radius-control);
+      border-radius:7px;
       box-shadow:inset 0 0 0 4px #8a6da4,4px 4px 0 #38273e;
       font-size:24px;
     }
@@ -390,23 +419,25 @@
       padding:7px;
       background:#453450;
       border:4px solid #2c2032;
-      border-radius:var(--radius-control);
+      border-radius:7px;
       box-shadow:inset 0 0 0 3px #755987,4px 4px 0 #38273e;
       overflow:hidden;
     }
 
     .meter-track i {
       display:block;
-      border:2px solid rgba(43,32,48,.45);
-      border-radius:6px;
+      border:2px solid rgba(43,32,48,.55);
+      border-radius:3px;
+      box-shadow:inset 0 4px 0 rgba(255,255,255,.12);
     }
+
     .meter-track i:nth-child(1) { background:var(--pink); }
     .meter-track i:nth-child(2) { background:var(--yellow); }
     .meter-track i:nth-child(3) { background:#56b67a; }
     .meter-track i:nth-child(4) { background:var(--teal); }
 
     .dialogue-side {
-      height:275px;
+      height:285px;
       display:grid;
       grid-template-rows:62px 1fr;
       gap:10px;
@@ -425,10 +456,11 @@
       color:var(--yellow-hi);
       background:#58406c;
       border:5px solid #2b1e32;
-      border-radius:18px;
-      box-shadow:inset 0 0 0 5px #805e98,4px 4px 0 #9b684c;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 5px #805e98,5px 5px 0 #9b684c;
       font-size:32px;
       letter-spacing:4px;
+      text-shadow:3px 3px 0 #2b1e32;
     }
 
     .badge-row {
@@ -447,8 +479,8 @@
       color:var(--text-dark);
       background:var(--teal);
       border:5px solid #302139;
-      border-radius:16px;
-      box-shadow:inset 0 0 0 4px #78dfc7;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #78dfc7,4px 4px 0 #9b684c;
       font-size:19px;
       font-weight:700;
     }
@@ -463,7 +495,8 @@
 
     .badge-bars i {
       background:#a65f50;
-      border-radius:4px;
+      border-radius:2px;
+      box-shadow:2px 0 0 #77433a;
     }
 
     .dialogue-box {
@@ -472,9 +505,19 @@
       color:var(--text-light);
       background:#302537;
       border:5px solid #241a2b;
-      border-radius:20px;
-      box-shadow:inset 0 0 0 3px #3e3046,4px 4px 0 #b27a4d;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #44334c,5px 5px 0 #b27a4d;
       overflow:hidden;
+    }
+
+    .dialogue-box::before {
+      content:"";
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:4px;
+      background:#5b4665;
     }
 
     .dialogue-text {
@@ -484,6 +527,7 @@
       line-height:1.24;
       letter-spacing:.4px;
       white-space:pre-line;
+      text-shadow:2px 2px 0 #17111b;
     }
 
     .dialogue-question {
@@ -518,66 +562,33 @@
       color:var(--text-dark);
       background:var(--yellow);
       border:4px solid #211724;
-      border-radius:var(--radius-control);
+      border-radius:7px;
       box-shadow:inset 0 0 0 3px var(--yellow-hi),4px 4px 0 #1e1522;
       cursor:pointer;
       font-size:16px;
       font-weight:700;
+      transition:transform .05s steps(2,end),filter .05s steps(2,end);
     }
 
     .next-btn:hover,
-    .next-btn:focus-visible { outline:0; filter:brightness(1.08); }
+    .next-btn:focus-visible {
+      outline:0;
+      filter:brightness(1.08);
+      transform:translate(-2px,-2px);
+    }
+
+    .next-btn:active { transform:translate(2px,2px); }
 
     .next-btn:disabled {
       opacity:.45;
       cursor:default;
       filter:none;
+      transform:none;
     }
 
-    .response-section {
-      position:relative;
-      height:305px;
-      margin:18px 18px 0;
-      padding:18px 16px;
-      border:4px solid #b97859;
-      border-right-color:#d8a16e;
-      border-bottom-color:#d8a16e;
-      border-radius:20px;
-      background:var(--sand);
-      box-shadow:inset 0 0 0 4px #d9a679;
-      overflow:visible;
-    }
-
-    .response-title {
-      position:absolute;
-      top:-15px;
-      left:50%;
-      transform:translateX(-50%);
-      width:320px;
-      height:27px;
-      padding:0 18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-      color:#915846;
-      background:var(--sand);
-      border-radius:12px;
-      font-size:19px;
-      font-weight:700;
-      letter-spacing:1px;
-    }
-
-    .response-title::before,
-    .response-title::after {
-      content:"◆ ◆";
-      font-size:9px;
-      letter-spacing:5px;
-      opacity:.55;
-    }
-
+    /* Questions now sit directly inside the yellow main panel. */
     .questions {
-      height:100%;
+      min-height:0;
       display:grid;
       grid-template-rows:repeat(4,1fr);
       gap:10px;
@@ -585,33 +596,41 @@
 
     .question-btn {
       width:100%;
-      min-height:55px;
+      min-height:0;
       display:grid;
       grid-template-columns:68px 1fr 58px;
       align-items:center;
       padding:0 10px 0 0;
-      border:3px solid #2a1d31;
-      border-radius:16px;
+      border:4px solid #2a1d31;
+      border-radius:8px;
       background:var(--cream);
       color:var(--text-dark);
-      box-shadow:inset 0 0 0 2px var(--cream-hi),4px 4px 0 #5f3f44;
+      box-shadow:inset 0 0 0 3px var(--cream-hi),5px 5px 0 #6b4548;
       cursor:pointer;
       text-align:left;
-      transition:transform .05s linear,filter .08s linear;
+      transition:transform .06s steps(2,end),filter .06s steps(2,end);
       overflow:hidden;
+    }
+
+    .question-btn::after {
+      content:"";
+      position:absolute;
+      pointer-events:none;
     }
 
     .question-btn:hover,
     .question-btn:focus-visible {
       outline:0;
-      filter:brightness(1.08);
-      transform:translate(-1px,-1px);
+      filter:brightness(1.07);
+      transform:translate(-3px,-3px);
     }
+
+    .question-btn:active { transform:translate(3px,3px); }
 
     .question-btn.active {
       background:#fff0c9;
-      border-color:#5a3a52;
-      box-shadow:inset 0 0 0 2px #fff7db,4px 4px 0 #72434e;
+      border-color:#58394f;
+      box-shadow:inset 0 0 0 3px #fff8dc,5px 5px 0 #72434e;
     }
 
     .q-number {
@@ -620,10 +639,11 @@
       place-items:center;
       color:#fff4cf;
       background:var(--blue);
-      border-right:3px solid #2a1d31;
-      border-radius:12px 0 0 12px;
+      border-right:4px solid #2a1d31;
+      border-radius:4px 0 0 4px;
       font-size:28px;
-      text-shadow:2px 2px 0 rgba(0,0,0,.28);
+      text-shadow:3px 3px 0 rgba(0,0,0,.3);
+      box-shadow:inset 0 4px 0 rgba(255,255,255,.16);
     }
 
     .question-btn:nth-child(2) .q-number { background:var(--green); }
@@ -638,6 +658,7 @@
       overflow:hidden;
       white-space:nowrap;
       text-overflow:ellipsis;
+      text-shadow:2px 2px 0 rgba(255,255,255,.24);
     }
 
     .q-icon {
@@ -649,8 +670,8 @@
       color:var(--cream);
       background:#352740;
       border:3px solid #211724;
-      border-radius:11px;
-      box-shadow:inset 0 0 0 2px #5a4668;
+      border-radius:6px;
+      box-shadow:inset 0 0 0 2px #5a4668,3px 3px 0 #2a1d31;
       font-size:20px;
     }
 
@@ -660,7 +681,9 @@
       z-index:40;
       pointer-events:none;
       transform:translateX(-105%);
-      background:#4d385f;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.05) 4px,transparent 4px) 0 0/16px 16px,
+        #4d385f;
       border-right:12px solid var(--yellow);
       box-shadow:inset -9px 0 0 #7e5b92;
     }
@@ -674,6 +697,7 @@
       color:var(--yellow-hi);
       font-size:38px;
       letter-spacing:4px;
+      text-shadow:4px 4px 0 #241a2b;
     }
 
     .swipe.play { animation:pixelSwipe 560ms steps(10,end) both; }
@@ -731,6 +755,7 @@
                   <img class="scene-bg" src="assets/background.gif" alt="" aria-hidden="true" />
                   <img id="character" class="character" src="assets/idle.gif" alt="Ryu character idle animation" />
                 </div>
+
                 <div class="meter" aria-hidden="true">
                   <div class="mood-face">☻</div>
                   <div class="meter-track"><i></i><i></i><i></i><i></i></div>
@@ -750,6 +775,7 @@
                   <p class="dialogue-text" id="dialogueText" aria-live="polite">HEY — WELCOME TO MY DIALOGUE SYSTEM.
 PICK A QUESTION BELOW TO GET STARTED.</p>
                   <span class="dialogue-question" id="dialogueQuestion">Choose a response.</span>
+
                   <div class="dialogue-nav">
                     <span class="page-count" id="pageCount"></span>
                     <button class="next-btn" id="nextButton" type="button" aria-label="More dialogue">MORE ▼</button>
@@ -758,10 +784,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
               </div>
             </div>
 
-            <section class="response-section">
-              <div class="response-title">CHOOSE A RESPONSE</div>
-              <div class="questions" id="questions"></div>
-            </section>
+            <div class="questions" id="questions" aria-label="Interview questions"></div>
           </section>
         </section>
       </div>
@@ -852,6 +875,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
         month:"short",
         year:"numeric"
       }).formatToParts(now);
+
       const pick = type => parts.find(part => part.type === type)?.value || "";
       tokyoDate.textContent = `TOKYO · ${pick("weekday").toUpperCase()} ${pick("day")} ${pick("month").toUpperCase()} ${pick("year")}`;
     }
@@ -862,6 +886,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
       swipe.classList.remove("play");
       void swipe.offsetWidth;
       swipe.classList.add("play");
+
       window.setTimeout(callback,255);
       window.setTimeout(() => {
         swipe.classList.remove("play");
@@ -896,16 +921,19 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
         link.rel = "noreferrer";
         link.setAttribute("aria-label",item.label);
         link.innerHTML = `<span class="glyph">${item.glyph}</span>`;
+
         link.addEventListener("mouseenter",() => showTooltip(item.label));
         link.addEventListener("mouseleave",hideTooltip);
         link.addEventListener("focus",() => showTooltip(item.label));
         link.addEventListener("blur",hideTooltip);
+
         linkStack.appendChild(link);
       });
     }
 
     function renderQuestions() {
       questions.innerHTML = "";
+
       dialogue.forEach((item,index) => {
         const button = document.createElement("button");
         button.className = "question-btn";
@@ -918,6 +946,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
         button.addEventListener("click",() => selectQuestion(index));
         questions.appendChild(button);
       });
+
       updateQuestionHighlight();
     }
 
@@ -973,8 +1002,8 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
 
     nextButton.addEventListener("click",() => {
       if (activeIndex === null) return;
-      const item = dialogue[activeIndex];
 
+      const item = dialogue[activeIndex];
       if (activePage < item.pages.length - 1) {
         activePage += 1;
         updateDialogue();
@@ -991,6 +1020,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
     });
 
     window.addEventListener("resize",fitCanvas);
+
     renderLinks();
     renderQuestions();
     updateTokyoDate();
