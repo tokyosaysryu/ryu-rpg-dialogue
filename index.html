@@ -3,562 +3,785 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Interactive RPG-style portfolio dialogue." />
-  <title>Ryu — Dialogue System</title>
+  <meta name="description" content="Ryu's interactive pixel RPG dialogue system." />
+  <title>Ryu — Dialogue.System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #121212;
-      --paper: #f1eadf;
-      --paper-2: #e7ddcf;
-      --cream: #fff8e8;
-      --orange: #f66b38;
-      --blue: #81a8d8;
-      --yellow: #e7d052;
-      --green: #8aa86b;
-      --muted: #6c665e;
-      --pixel: 3px;
+      --ink: #2b2030;
+      --ink-2: #3a2b43;
+      --purple: #58416c;
+      --purple-hi: #7b5c96;
+      --purple-low: #44334f;
+      --yellow: #f2c65b;
+      --yellow-hi: #ffe58b;
+      --yellow-low: #c58d45;
+      --sand: #c99369;
+      --sand-hi: #dfb38a;
+      --cream: #ebd7af;
+      --cream-hi: #f8e9c9;
+      --teal: #3ec1ae;
+      --green: #62c56b;
+      --pink: #e95d83;
+      --blue: #48aac7;
+      --lilac: #9474c7;
+      --text-dark: #392b42;
+      --text-light: #fff0d3;
+      --pixel: 4px;
     }
 
     * { box-sizing: border-box; }
 
-    html,
-    body {
+    html, body {
       margin: 0;
-      min-width: 1420px;
-      min-height: 610px;
-      background: #101010;
-      color: var(--ink);
+      width: 100%;
+      height: 100%;
+      background: #1e1723;
+      overflow: hidden;
     }
 
     body {
       display: grid;
       place-items: center;
       font-family: "Pixelify Sans", monospace;
-      overflow: auto;
+      color: var(--text-light);
+      image-rendering: pixelated;
     }
 
-    button,
-    a { font: inherit; }
+    button, a { font: inherit; }
 
-    .game-shell {
+    .canvas {
       position: relative;
       width: 1420px;
       height: 610px;
+      flex: 0 0 auto;
       overflow: hidden;
-      background: var(--paper);
-      border: var(--pixel) solid var(--ink);
-      box-shadow: 8px 8px 0 #000;
-      image-rendering: pixelated;
-    }
-
-    .top-header {
-      height: 66px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: stretch;
-      border-bottom: var(--pixel) solid var(--ink);
-      background: var(--cream);
-    }
-
-    .brand-block {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 0 20px;
-      border-right: var(--pixel) solid var(--ink);
-    }
-
-    .brand-mark {
-      width: 29px;
-      height: 29px;
-      background: var(--orange);
-      border: var(--pixel) solid var(--ink);
-      box-shadow: 4px 4px 0 var(--ink);
-    }
-
-    .brand-copy {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      text-transform: uppercase;
-      letter-spacing: .02em;
-    }
-
-    .brand-copy strong {
-      font-size: 23px;
-      font-weight: 700;
-    }
-
-    .brand-copy span {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .date-header {
-      display: grid;
-      grid-template-columns: 152px 120px 112px 122px;
-      height: 100%;
-    }
-
-    .date-cell {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 0 14px;
-      border-left: var(--pixel) solid var(--ink);
-      text-transform: uppercase;
-    }
-
-    .date-cell:first-child { border-left: 0; }
-
-    .date-cell .label {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1;
-      margin-bottom: 5px;
-    }
-
-    .date-cell .value {
-      font-size: 19px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .date-cell.location {
-      background: var(--yellow);
-    }
-
-    .middle {
-      height: 366px;
-      display: grid;
-      grid-template-columns: 230px 1fr;
-      border-bottom: var(--pixel) solid var(--ink);
-    }
-
-    .link-rail {
-      background: var(--paper-2);
-      border-right: var(--pixel) solid var(--ink);
-      padding: 18px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .rail-title {
-      font-size: 13px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin: 1px 2px 6px;
-    }
-
-    .pixel-link {
-      position: relative;
-      min-height: 57px;
-      display: grid;
-      grid-template-columns: 32px 1fr 16px;
-      align-items: center;
-      gap: 8px;
-      padding: 0 12px;
-      color: var(--ink);
-      background: var(--cream);
-      text-decoration: none;
-      text-transform: uppercase;
-      border: var(--pixel) solid var(--ink);
-      box-shadow: 4px 4px 0 var(--ink);
-      transition: transform .08s linear, box-shadow .08s linear, background .08s linear;
-    }
-
-    .pixel-link:hover,
-    .pixel-link:focus-visible {
-      background: var(--yellow);
-      outline: none;
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--ink);
-    }
-
-    .pixel-link .icon {
-      width: 22px;
-      height: 22px;
-      display: grid;
-      place-items: center;
-      border: 2px solid var(--ink);
-      background: var(--blue);
-      font-size: 13px;
-    }
-
-    .pixel-link:nth-of-type(3) .icon { background: var(--orange); }
-    .pixel-link:nth-of-type(4) .icon { background: var(--green); }
-
-    .pixel-link .name {
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .pixel-link .arrow {
-      font-size: 17px;
-      text-align: right;
-    }
-
-    .rail-footer {
-      margin-top: auto;
-      padding: 12px;
       background: var(--ink);
-      color: var(--paper);
-      font-size: 12px;
-      line-height: 1.35;
-      text-transform: uppercase;
+      border: 4px solid #17111b;
+      box-shadow:
+        inset 0 0 0 4px #4d3b55,
+        inset 0 0 0 8px #241b29,
+        12px 12px 0 rgba(0,0,0,.28);
+      transform-origin: center center;
     }
 
-    .stage {
-      position: relative;
-      overflow: hidden;
-      background: #c7d0d0;
-    }
-
-    .background-layer,
-    .stage-fallback {
+    .canvas::after {
+      content: "";
       position: absolute;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      z-index: 50;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.018) 0,
+        rgba(255,255,255,.018) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      mix-blend-mode: soft-light;
     }
 
-    .background-layer {
-      z-index: 0;
-      object-fit: cover;
-      object-position: center;
-      image-rendering: pixelated;
-    }
-
-    .stage-fallback {
-      z-index: -1;
-      background:
-        linear-gradient(90deg, transparent 0 49%, rgba(0,0,0,.05) 49% 51%, transparent 51% 100%),
-        linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px),
-        #bcc8c9;
-      background-size: 100% 100%, 28px 28px, 28px 28px, auto;
-    }
-
-    .stage-label {
-      position: absolute;
-      z-index: 3;
-      top: 16px;
-      left: 18px;
-      padding: 7px 10px;
-      background: var(--cream);
-      border: var(--pixel) solid var(--ink);
-      box-shadow: 3px 3px 0 var(--ink);
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-
-    .character {
-      position: absolute;
-      z-index: 2;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: 56% 100%;
-      image-rendering: pixelated;
-      transition: opacity .12s linear;
-    }
-
-    .character.switching { opacity: .2; }
-
-    .stage-deco {
-      position: absolute;
-      z-index: 1;
-      border: var(--pixel) solid var(--ink);
-      background: var(--orange);
-    }
-
-    .stage-deco.one {
-      width: 28px;
-      height: 28px;
-      right: 26px;
-      top: 26px;
-    }
-
-    .stage-deco.two {
-      width: 58px;
-      height: 15px;
-      right: 24px;
-      bottom: 30px;
-      background: var(--yellow);
-    }
-
-    .bottom-panel {
-      height: 178px;
-      background: var(--cream);
-      display: grid;
-      grid-template-rows: 32px 1fr;
-    }
-
-    .dialogue-bar {
+    .topbar {
+      height: 64px;
+      padding: 0 28px 0 38px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 15px;
-      border-bottom: var(--pixel) solid var(--ink);
-      background: var(--yellow);
-      text-transform: uppercase;
-      font-size: 13px;
-    }
-
-    .dialogue-bar strong { font-size: 14px; }
-
-    .dialogue-content {
+      background: #271d2c;
+      border-bottom: 5px solid #120e16;
+      box-shadow: inset 0 -3px 0 #4a3952;
       position: relative;
-      padding: 14px 16px 15px;
-      overflow: hidden;
+      z-index: 3;
     }
 
-    .questions-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 12px;
-    }
-
-    .question-button,
-    .nav-button {
-      border: var(--pixel) solid var(--ink);
-      background: var(--paper);
-      color: var(--ink);
-      box-shadow: 4px 4px 0 var(--ink);
-      cursor: pointer;
-      transition: transform .08s linear, box-shadow .08s linear, background .08s linear;
-    }
-
-    .question-button {
-      min-height: 54px;
-      display: grid;
-      grid-template-columns: 38px 1fr 18px;
+    .brand,
+    .tokyo-clock {
+      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 0 12px;
-      text-align: left;
+      gap: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      white-space: nowrap;
     }
 
-    .question-button:hover,
-    .question-button:focus-visible,
-    .nav-button:hover,
-    .nav-button:focus-visible {
-      background: var(--blue);
-      outline: none;
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--ink);
-    }
+    .brand { font-size: 31px; }
+    .tokyo-clock { font-size: 28px; }
 
-    .question-number {
-      width: 28px;
+    .signal {
+      display: grid;
+      grid-template-columns: repeat(3, 11px);
+      gap: 4px;
+      align-items: end;
+      width: 41px;
       height: 28px;
+    }
+
+    .signal i {
+      display: block;
+      width: 11px;
+      background: var(--pink);
+      box-shadow: 3px -3px 0 #2b2030;
+    }
+    .signal i:nth-child(1) { height: 14px; }
+    .signal i:nth-child(2) { height: 21px; background: #ee6a69; }
+    .signal i:nth-child(3) { height: 27px; background: #50b99f; }
+
+    .tiny-face,
+    .sound-icon {
+      width: 32px;
+      height: 32px;
       display: grid;
       place-items: center;
-      background: var(--ink);
-      color: var(--cream);
-      font-size: 12px;
-    }
-
-    .question-label {
-      font-size: 16px;
-      line-height: 1.08;
-    }
-
-    .answer-view {
-      height: 100%;
-      display: grid;
-      grid-template-columns: 1fr 255px;
-      gap: 18px;
-      align-items: stretch;
-    }
-
-    .answer-copy {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-width: 0;
-      padding: 0 4px;
-    }
-
-    .answer-question {
-      margin: 0 0 6px;
-      color: var(--muted);
-      font-size: 13px;
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .answer-text {
-      margin: 0;
+      color: var(--ink);
+      background: var(--cream);
+      border: 3px solid #fff0cf;
+      box-shadow: 3px 3px 0 #7d5c66;
       font-size: 20px;
-      line-height: 1.22;
     }
 
-    .answer-controls {
+    .sound-icon {
+      color: var(--green);
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      font-size: 34px;
+      width: auto;
+    }
+
+    .workspace {
+      height: 546px;
+      padding: 10px;
       display: grid;
-      grid-template-rows: 1fr 1fr;
-      gap: 9px;
+      grid-template-columns: 118px 1260px;
+      gap: 22px;
+      background: linear-gradient(#55455e, #4a3b54);
     }
 
-    .nav-button {
+    .sidebar {
+      position: relative;
+      height: 526px;
+      padding: 72px 12px 42px;
+      background: #33273b;
+      border: 4px solid #201825;
+      box-shadow:
+        inset 0 0 0 4px #665276,
+        inset 0 0 0 8px #463650,
+        6px 6px 0 #241a2a;
+    }
+
+    .rail-cap {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      height: 45px;
+      display: grid;
+      place-items: center;
+      background: var(--purple-low);
+      color: #a98bc1;
+      border: 3px solid #211725;
+      box-shadow: inset 0 0 0 3px #6e5680, 4px 4px 0 #1b151f;
+      font-size: 24px;
+    }
+
+    .rail-cap.top { top: 10px; }
+    .rail-cap.bottom { bottom: 10px; }
+
+    .link-stack {
+      display: grid;
+      gap: 13px;
+      justify-items: center;
+    }
+
+    .site-link {
+      position: relative;
+      width: 84px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      color: #cdbde2;
+      background: #59456c;
+      border: 4px solid #211724;
+      box-shadow:
+        inset 0 0 0 4px #78638d,
+        5px 5px 0 #211724;
+      transition: transform .08s linear, filter .08s linear;
+    }
+
+    .site-link:first-child {
+      color: var(--ink);
+      background: var(--yellow);
+      box-shadow: inset 0 0 0 4px var(--yellow-hi), 5px 5px 0 #211724;
+    }
+
+    .site-link:hover,
+    .site-link:focus-visible {
+      outline: 0;
+      filter: brightness(1.08);
+      transform: translate(-2px, -2px);
+    }
+
+    .site-link:active { transform: translate(2px, 2px); }
+
+    .site-link .glyph {
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .site-link::after {
+      content: attr(data-label);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 15;
+      display: none;
+      padding: 7px 10px;
+      background: var(--ink);
+      border: 3px solid var(--yellow);
+      color: var(--text-light);
+      font-size: 15px;
+      white-space: nowrap;
+      box-shadow: 4px 4px 0 #120d16;
+    }
+
+    .site-link:hover::after,
+    .site-link:focus-visible::after { display: block; }
+
+    .main-area {
+      position: relative;
+      height: 526px;
+    }
+
+    .tabs {
+      position: absolute;
+      top: 0;
+      left: 18px;
+      z-index: 4;
+      height: 61px;
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .tab {
+      height: 52px;
+      min-width: 215px;
+      padding: 0 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #b39cc9;
+      background: #58436d;
+      border: 4px solid #231728;
+      border-bottom: 0;
+      box-shadow: inset 0 0 0 4px #72598a;
+      font-size: 23px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .tab.active {
+      height: 61px;
+      color: var(--text-dark);
+      background: var(--yellow);
+      box-shadow: inset 0 0 0 4px var(--yellow-hi);
+    }
+
+    .window-actions {
+      position: absolute;
+      right: 5px;
+      top: 0;
+      z-index: 6;
+      display: flex;
+      gap: 8px;
+    }
+
+    .window-btn {
+      width: 78px;
+      height: 60px;
+      display: grid;
+      place-items: center;
+      color: var(--cream);
+      background: #59456d;
+      border: 4px solid #211724;
+      box-shadow: inset 0 0 0 4px #765f89, 4px 4px 0 #201724;
+      text-decoration: none;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .window-btn:hover,
+    .window-btn:focus-visible { outline: 0; filter: brightness(1.12); }
+
+    .panel {
+      position: absolute;
+      left: 0;
+      top: 56px;
+      width: 1260px;
+      height: 470px;
+      padding: 24px 24px 18px;
+      background: var(--yellow);
+      border: 5px solid #241a2b;
+      box-shadow:
+        inset 0 0 0 5px var(--yellow-hi),
+        inset 0 0 0 10px var(--yellow-low),
+        7px 7px 0 #2d2134;
+      clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px), 0 18px);
+    }
+
+    .panel-bolt {
+      position: absolute;
+      width: 23px;
+      height: 23px;
+      border: 3px solid #241a2b;
+      background: #43354f;
+      box-shadow: inset 4px 4px 0 #675475;
+    }
+    .panel-bolt.a { left: 17px; top: 18px; }
+    .panel-bolt.b { right: 17px; top: 18px; }
+
+    .top-content {
+      height: 246px;
+      display: grid;
+      grid-template-columns: 365px 1fr;
+      gap: 28px;
+      padding: 10px 18px 0;
+    }
+
+    .portrait-wrap {
+      height: 238px;
+      display: grid;
+      grid-template-rows: 192px 38px;
+      gap: 8px;
+    }
+
+    .portrait-frame {
+      position: relative;
+      overflow: hidden;
+      background: #30263a;
+      border: 5px solid #312238;
+      box-shadow:
+        inset 0 0 0 5px #6b557b,
+        5px 5px 0 #9f684b;
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+    }
+
+    .scene-bg,
+    .character {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      padding: 0 12px;
-      text-transform: uppercase;
-      font-size: 14px;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .scene-bg {
+      z-index: 0;
+      background: linear-gradient(135deg,#2a2432,#4e3f59);
+      opacity: .9;
+    }
+
+    .character {
+      z-index: 1;
+      object-fit: contain;
+      transform: scale(1.32) translateY(7px);
+      transform-origin: center bottom;
+      transition: opacity .08s linear, transform .12s linear;
+    }
+
+    .character.switching { opacity: .2; transform: scale(1.27) translateY(7px); }
+
+    .meter {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 7px;
+    }
+
+    .mood-face {
+      display: grid;
+      place-items: center;
+      color: var(--text-dark);
+      background: #5b4470;
+      border: 4px solid #2c2032;
+      box-shadow: inset 0 0 0 4px #8a6da4, 4px 4px 0 #38273e;
+      font-size: 24px;
+    }
+
+    .meter-track {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      padding: 7px;
+      background: #453450;
+      border: 4px solid #2c2032;
+      box-shadow: inset 0 0 0 3px #755987, 4px 4px 0 #38273e;
+    }
+
+    .meter-track i { display: block; border: 2px solid rgba(43,32,48,.45); }
+    .meter-track i:nth-child(1) { background: var(--pink); }
+    .meter-track i:nth-child(2) { background: var(--yellow); }
+    .meter-track i:nth-child(3) { background: #56b67a; }
+    .meter-track i:nth-child(4) { background: var(--teal); }
+
+    .dialogue-side {
+      height: 238px;
+      display: grid;
+      grid-template-rows: 58px 1fr;
+      gap: 10px;
+    }
+
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 194px;
+      gap: 18px;
+    }
+
+    .nameplate {
+      display: flex;
+      align-items: center;
+      padding: 0 26px;
+      color: var(--yellow-hi);
+      background: #58406c;
+      border: 5px solid #2b1e32;
+      box-shadow: inset 0 0 0 5px #805e98, 4px 4px 0 #9b684c;
+      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+      font-size: 32px;
+      letter-spacing: 4px;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      color: #9b5f54;
+    }
+
+    .shield {
+      width: 56px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      color: var(--text-dark);
+      background: var(--teal);
+      border: 5px solid #302139;
+      box-shadow: inset 0 0 0 4px #78dfc7;
+      clip-path: polygon(10% 0, 90% 0, 90% 68%, 50% 100%, 10% 68%);
+      font-size: 19px;
       font-weight: 700;
     }
 
-    .next-button { background: var(--orange); }
-    .back-button { background: var(--paper-2); }
-
-    .page-counter {
-      position: absolute;
-      right: 290px;
-      bottom: 9px;
-      font-size: 11px;
-      color: var(--muted);
+    .badge-bars {
+      display: grid;
+      grid-template-columns: repeat(5, 6px);
+      gap: 7px;
+      height: 42px;
+      align-items: stretch;
     }
 
-    .hidden { display: none !important; }
+    .badge-bars i { background: #a65f50; }
 
-    .swipe-transition {
+    .dialogue-box {
+      position: relative;
+      padding: 18px 58px 18px 28px;
+      color: var(--text-light);
+      background: #302537;
+      border: 5px solid #241a2b;
+      box-shadow: inset 0 0 0 3px #3e3046, 4px 4px 0 #b27a4d;
+      overflow: hidden;
+    }
+
+    .dialogue-text {
+      margin: 0;
+      max-width: 760px;
+      font-size: 24px;
+      line-height: 1.23;
+      letter-spacing: .4px;
+      white-space: pre-line;
+    }
+
+    .dialogue-question {
+      display: block;
+      margin-top: 8px;
+      color: #c7a9d2;
+      font-size: 15px;
+    }
+
+    .dialogue-nav {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-count {
+      color: #d5b9d9;
+      font-size: 14px;
+      min-width: 38px;
+      text-align: right;
+    }
+
+    .next-btn {
+      min-width: 49px;
+      height: 39px;
+      padding: 0 10px;
+      display: grid;
+      place-items: center;
+      color: var(--text-dark);
+      background: var(--yellow);
+      border: 4px solid #211724;
+      box-shadow: inset 0 0 0 3px var(--yellow-hi), 4px 4px 0 #1e1522;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .next-btn:hover,
+    .next-btn:focus-visible { outline: 0; filter: brightness(1.08); }
+
+    .response-section {
+      height: 168px;
+      margin: 10px 18px 0;
+      border-top: 4px solid #b97859;
+      border-left: 4px solid #b97859;
+      border-right: 4px solid #d8a16e;
+      border-bottom: 4px solid #d8a16e;
+      background: var(--sand);
+      padding: 0 14px 12px;
+      box-shadow: inset 0 0 0 4px #d9a679;
+    }
+
+    .response-title {
+      width: 290px;
+      height: 23px;
+      margin: -14px auto 3px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #915846;
+      background: var(--sand);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .response-title::before,
+    .response-title::after {
+      content: "◆ ◆";
+      font-size: 9px;
+      letter-spacing: 5px;
+      opacity: .55;
+    }
+
+    .questions {
+      display: grid;
+      gap: 5px;
+    }
+
+    .question-btn {
+      width: 100%;
+      height: 31px;
+      display: grid;
+      grid-template-columns: 55px 1fr 48px;
+      align-items: center;
+      padding: 0 8px 0 0;
+      border: 3px solid #2a1d31;
+      background: var(--cream);
+      color: var(--text-dark);
+      box-shadow: inset 0 0 0 2px var(--cream-hi), 4px 4px 0 #5f3f44;
+      cursor: pointer;
+      text-align: left;
+      transition: transform .05s linear, filter .08s linear;
+    }
+
+    .question-btn:hover,
+    .question-btn:focus-visible {
+      outline: 0;
+      filter: brightness(1.08);
+      transform: translate(-1px,-1px);
+    }
+
+    .question-btn.active {
+      background: #fff0c9;
+      border-color: #5a3a52;
+      box-shadow: inset 0 0 0 2px #fff7db, 4px 4px 0 #72434e;
+    }
+
+    .q-number {
+      align-self: stretch;
+      display: grid;
+      place-items: center;
+      color: #fff4cf;
+      background: var(--blue);
+      border-right: 3px solid #2a1d31;
+      font-size: 21px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,.28);
+    }
+    .question-btn:nth-child(2) .q-number { background: var(--green); }
+    .question-btn:nth-child(3) .q-number { background: var(--lilac); }
+    .question-btn:nth-child(4) .q-number { background: var(--pink); }
+
+    .q-label {
+      padding: 0 18px;
+      font-size: 18px;
+      font-weight: 700;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .q-icon {
+      width: 38px;
+      height: 25px;
+      display: grid;
+      place-items: center;
+      justify-self: end;
+      color: var(--cream);
+      background: #352740;
+      border: 3px solid #211724;
+      box-shadow: inset 0 0 0 2px #5a4668;
+      font-size: 18px;
+    }
+
+    .swipe {
       position: absolute;
       inset: 0;
-      z-index: 100;
+      z-index: 40;
       pointer-events: none;
-      transform: translateX(-102%);
-      background: var(--ink);
+      transform: translateX(-105%);
+      background: #4d385f;
+      border-right: 12px solid var(--yellow);
+      box-shadow: inset -9px 0 0 #7e5b92;
     }
 
-    .swipe-transition::after {
-      content: "";
+    .swipe::before {
+      content: "DIALOGUE.SYSTEM";
       position: absolute;
-      top: 0;
-      right: 0;
-      width: 18px;
-      height: 100%;
-      background: var(--orange);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      color: var(--yellow-hi);
+      font-size: 38px;
+      letter-spacing: 4px;
     }
 
-    .swipe-transition.active {
-      animation: pixelSwipe .58s steps(8, end) both;
-    }
+    .swipe.play { animation: pixelSwipe 560ms steps(10, end) both; }
 
     @keyframes pixelSwipe {
-      0% { transform: translateX(-102%); }
-      45%, 55% { transform: translateX(0); }
-      100% { transform: translateX(102%); }
+      0% { transform: translateX(-105%); }
+      45% { transform: translateX(0); }
+      55% { transform: translateX(0); }
+      100% { transform: translateX(105%); }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .swipe-transition.active { animation-duration: .01ms; }
-      * { transition: none !important; }
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="game-shell" aria-label="Interactive portfolio dialogue system">
-    <header class="top-header">
-      <div class="brand-block">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <div class="brand-copy">
-          <strong>Ryu Dialogue System</strong>
-          <span>Interactive application / Fudge</span>
-        </div>
+  <main class="canvas" id="canvas" aria-label="Interactive pixel dialogue system">
+    <header class="topbar">
+      <div class="brand">
+        <span class="signal" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="tiny-face" aria-hidden="true">■</span>
+        <span>DIALOGUE.SYSTEM</span>
       </div>
-
-      <div class="date-header" aria-label="Tokyo date">
-        <div class="date-cell">
-          <span class="label">Day</span>
-          <span class="value" id="dayValue">Thursday</span>
-        </div>
-        <div class="date-cell">
-          <span class="label">Date</span>
-          <span class="value" id="dateValue">20 Aug</span>
-        </div>
-        <div class="date-cell">
-          <span class="label">Year</span>
-          <span class="value" id="yearValue">2026</span>
-        </div>
-        <div class="date-cell location">
-          <span class="label">Location</span>
-          <span class="value">Tokyo</span>
-        </div>
+      <div class="tokyo-clock">
+        <span class="sound-icon" aria-hidden="true">◖))</span>
+        <span id="tokyoDate">TOKYO · THU 20 AUG 2026</span>
       </div>
     </header>
 
-    <section class="middle">
-      <nav class="link-rail" aria-label="External links">
-        <div class="rail-title">External links</div>
+    <div class="workspace">
+      <aside class="sidebar" aria-label="External links">
+        <div class="rail-cap top" aria-hidden="true">▲</div>
+        <nav class="link-stack" id="linkStack"></nav>
+        <div class="rail-cap bottom" aria-hidden="true">▼</div>
+      </aside>
 
-        <a class="pixel-link" href="https://www.ryutanaka.com/" data-external>
-          <span class="icon">01</span>
-          <span class="name">Portfolio</span>
-          <span class="arrow">↗</span>
-        </a>
-
-        <a class="pixel-link" href="https://github.com/tokyosaysryu" data-external>
-          <span class="icon">02</span>
-          <span class="name">GitHub</span>
-          <span class="arrow">↗</span>
-        </a>
-
-        <a class="pixel-link" href="https://www.fudgeanimation.com/" data-external>
-          <span class="icon">03</span>
-          <span class="name">Fudge</span>
-          <span class="arrow">↗</span>
-        </a>
-
-        <div class="rail-footer">
-          SELECT A LINK<br>
-          OR ASK ME SOMETHING ↓
+      <section class="main-area">
+        <div class="tabs" aria-label="Dialogue interface tabs">
+          <div class="tab active">▣ DIALOGUE</div>
+          <div class="tab">⚑ PROFILE</div>
+          <div class="tab">◇ SYSTEM</div>
         </div>
-      </nav>
 
-      <div class="stage">
-        <div class="stage-fallback" aria-hidden="true"></div>
-        <img class="background-layer" src="assets/background.gif" alt="" aria-hidden="true" />
-        <div class="stage-label" id="status">Idle / Waiting</div>
-        <div class="stage-deco one" aria-hidden="true"></div>
-        <div class="stage-deco two" aria-hidden="true"></div>
-        <img id="character" class="character" src="assets/idle.gif" alt="Animated character in an idle pose" />
-      </div>
-    </section>
-
-    <section class="bottom-panel">
-      <div class="dialogue-bar">
-        <strong>Dialogue / Ask me something</strong>
-        <span id="dialogueStatus">04 questions available</span>
-      </div>
-
-      <div class="dialogue-content">
-        <div class="questions-grid" id="questionsGrid"></div>
-
-        <div class="answer-view hidden" id="answerView">
-          <div class="answer-copy">
-            <p class="answer-question" id="answerQuestion"></p>
-            <p class="answer-text" id="answerText" aria-live="polite"></p>
-          </div>
-          <div class="answer-controls">
-            <button class="nav-button next-button hidden" id="nextButton" type="button">Next →</button>
-            <button class="nav-button back-button" id="backButton" type="button">← Questions</button>
-          </div>
-          <span class="page-counter" id="pageCounter"></span>
+        <div class="window-actions">
+          <a class="window-btn external-action" href="https://github.com/tokyosaysryu/ryu-rpg-dialogue" target="_blank" rel="noreferrer" aria-label="Open GitHub repository">☰</a>
+          <button class="window-btn" id="resetButton" type="button" aria-label="Reset dialogue">×</button>
         </div>
-      </div>
-    </section>
 
-    <div class="swipe-transition" id="swipeTransition" aria-hidden="true"></div>
+        <section class="panel">
+          <span class="panel-bolt a" aria-hidden="true"></span>
+          <span class="panel-bolt b" aria-hidden="true"></span>
+
+          <div class="top-content">
+            <div class="portrait-wrap">
+              <div class="portrait-frame">
+                <!-- Replace assets/background.gif with your own GIF, or change this src to a PNG. -->
+                <img class="scene-bg" src="assets/background.gif" alt="" aria-hidden="true" />
+                <img id="character" class="character" src="assets/idle.gif" alt="Ryu character idle animation" />
+              </div>
+              <div class="meter" aria-hidden="true">
+                <div class="mood-face">☻</div>
+                <div class="meter-track"><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+
+            <div class="dialogue-side">
+              <div class="name-row">
+                <div class="nameplate">RYU</div>
+                <div class="badge-row" aria-hidden="true">
+                  <div class="shield">RT</div>
+                  <div class="badge-bars"><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+              </div>
+
+              <div class="dialogue-box">
+                <p class="dialogue-text" id="dialogueText" aria-live="polite">HEY — WELCOME TO MY DIALOGUE SYSTEM.
+PICK A QUESTION BELOW TO GET STARTED.</p>
+                <span class="dialogue-question" id="dialogueQuestion">Choose a response.</span>
+                <div class="dialogue-nav">
+                  <span class="page-count" id="pageCount"></span>
+                  <button class="next-btn" id="nextButton" type="button" aria-label="Next dialogue page">▼</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section class="response-section">
+            <div class="response-title">CHOOSE A RESPONSE</div>
+            <div class="questions" id="questions"></div>
+          </section>
+        </section>
+      </section>
+    </div>
+
+    <div class="swipe" id="swipe" aria-hidden="true"></div>
   </main>
 
   <script>
+    const externalLinks = [
+      { label: "Portfolio", glyph: "WEB", href: "https://www.ryutanaka.com/" },
+      { label: "GitHub", glyph: "GH", href: "https://github.com/tokyosaysryu" },
+      { label: "LinkedIn", glyph: "IN", href: "https://www.linkedin.com/" },
+      { label: "Behance", glyph: "BE", href: "https://www.behance.net/" },
+      { label: "Vimeo", glyph: "▶", href: "https://vimeo.com/" }
+    ];
+
     const dialogue = [
       {
         question: "Why would you want to work with us?",
@@ -566,16 +789,14 @@
           "Because Fudge seem to care about the same thing I do — using animation to make the delivery of ideas feel genuine, engaging and memorable.",
           "I also like the idea of working with a small team where people actually bounce ideas off each other and make things better together."
         ],
-        gif: "assets/reaction-awesome.gif",
-        status: "Excited / Fudge"
+        gif: "assets/reaction-awesome.gif"
       },
       {
         question: "Where are you based?",
         pages: [
           "Tokyo, Japan — surrounded by plenty of good food, visual inspiration and far too many sub cultures and hobbies to get into."
         ],
-        gif: "assets/reaction-tokyo.gif",
-        status: "Based / Tokyo"
+        gif: "assets/reaction-tokyo.gif"
       },
       {
         question: "What do you like to do with your time?",
@@ -583,8 +804,7 @@
           "Mostly making things I'm curious about. I experiment with 3D, motion, interactive design and occasionally work on my own game.",
           "When I’m away from the screen, I’m usually spending time with my family or making camp fire."
         ],
-        gif: "assets/reaction-make.gif",
-        status: "Curious / Making"
+        gif: "assets/reaction-make.gif"
       },
       {
         question: "Tell us a little about yourself.",
@@ -593,138 +813,188 @@
           "I started out studying architecture, somehow ended up making things move, and never really looked back.",
           "I’m a curious person by nature, love learning new tools, and probably spend more time than necessary fixing tiny details nobody else notices."
         ],
-        gif: "assets/reaction-about.gif",
-        status: "About / Ryu"
+        gif: "assets/reaction-about.gif"
       }
     ];
 
     const idleGif = "assets/idle.gif";
+    const canvas = document.getElementById("canvas");
+    const linkStack = document.getElementById("linkStack");
+    const questions = document.getElementById("questions");
+    const dialogueText = document.getElementById("dialogueText");
+    const dialogueQuestion = document.getElementById("dialogueQuestion");
     const character = document.getElementById("character");
-    const status = document.getElementById("status");
-    const questionsGrid = document.getElementById("questionsGrid");
-    const answerView = document.getElementById("answerView");
-    const answerQuestion = document.getElementById("answerQuestion");
-    const answerText = document.getElementById("answerText");
     const nextButton = document.getElementById("nextButton");
-    const backButton = document.getElementById("backButton");
-    const pageCounter = document.getElementById("pageCounter");
-    const dialogueStatus = document.getElementById("dialogueStatus");
-    const swipeTransition = document.getElementById("swipeTransition");
+    const pageCount = document.getElementById("pageCount");
+    const resetButton = document.getElementById("resetButton");
+    const swipe = document.getElementById("swipe");
+    const tokyoDate = document.getElementById("tokyoDate");
 
-    let activeItem = null;
+    let activeIndex = null;
     let activePage = 0;
     let transitioning = false;
+
+    function fitCanvas() {
+      const scale = Math.min(window.innerWidth / 1420, window.innerHeight / 610, 1);
+      canvas.style.transform = `scale(${scale})`;
+    }
 
     function updateTokyoDate() {
       const now = new Date();
       const parts = new Intl.DateTimeFormat("en-US", {
         timeZone: "Asia/Tokyo",
-        weekday: "long",
+        weekday: "short",
         day: "2-digit",
         month: "short",
         year: "numeric"
       }).formatToParts(now);
-
-      const get = type => parts.find(part => part.type === type)?.value || "";
-      document.getElementById("dayValue").textContent = get("weekday");
-      document.getElementById("dateValue").textContent = `${get("day")} ${get("month")}`;
-      document.getElementById("yearValue").textContent = get("year");
+      const pick = type => parts.find(part => part.type === type)?.value || "";
+      tokyoDate.textContent = `TOKYO · ${pick("weekday").toUpperCase()} ${pick("day")} ${pick("month").toUpperCase()} ${pick("year")}`;
     }
 
-    function switchGif(src, alt, label) {
+    function runSwipe(callback) {
+      if (transitioning) return;
+      transitioning = true;
+      swipe.classList.remove("play");
+      void swipe.offsetWidth;
+      swipe.classList.add("play");
+      window.setTimeout(callback, 255);
+      window.setTimeout(() => {
+        swipe.classList.remove("play");
+        transitioning = false;
+      }, 580);
+    }
+
+    function switchCharacter(src, alt) {
       character.classList.add("switching");
       window.setTimeout(() => {
         character.src = src;
         character.alt = alt;
-        status.textContent = label;
         character.classList.remove("switching");
-      }, 100);
+      }, 90);
     }
 
-    function withSwipe(callback) {
-      if (transitioning) return;
-      transitioning = true;
-      swipeTransition.classList.remove("active");
-      void swipeTransition.offsetWidth;
-      swipeTransition.classList.add("active");
-
-      window.setTimeout(callback, 265);
-      window.setTimeout(() => {
-        swipeTransition.classList.remove("active");
-        transitioning = false;
-      }, 600);
+    function renderLinks() {
+      externalLinks.forEach(item => {
+        const link = document.createElement("a");
+        link.className = "site-link external-action";
+        link.href = item.href;
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        link.dataset.label = item.label;
+        link.setAttribute("aria-label", item.label);
+        link.innerHTML = `<span class="glyph">${item.glyph}</span>`;
+        linkStack.appendChild(link);
+      });
     }
 
     function renderQuestions() {
-      activeItem = null;
-      activePage = 0;
-      questionsGrid.innerHTML = "";
-      questionsGrid.classList.remove("hidden");
-      answerView.classList.add("hidden");
-      dialogueStatus.textContent = "04 questions available";
-      switchGif(idleGif, "Animated character in an idle pose", "Idle / Waiting");
-
+      questions.innerHTML = "";
       dialogue.forEach((item, index) => {
         const button = document.createElement("button");
+        button.className = "question-btn";
         button.type = "button";
-        button.className = "question-button";
         button.innerHTML = `
-          <span class="question-number">0${index + 1}</span>
-          <span class="question-label">${item.question}</span>
-          <span>→</span>
+          <span class="q-number">${index + 1}</span>
+          <span class="q-label">${item.question}</span>
+          <span class="q-icon">${["⌕","◆","↗","★"][index]}</span>
         `;
-        button.addEventListener("click", () => withSwipe(() => showAnswer(index)));
-        questionsGrid.appendChild(button);
+        button.addEventListener("click", () => selectQuestion(index));
+        questions.appendChild(button);
+      });
+      updateQuestionHighlight();
+    }
+
+    function updateQuestionHighlight() {
+      [...questions.children].forEach((button, index) => {
+        button.classList.toggle("active", index === activeIndex);
       });
     }
 
-    function showAnswer(index) {
-      activeItem = dialogue[index];
-      activePage = 0;
-      questionsGrid.classList.add("hidden");
-      answerView.classList.remove("hidden");
-      switchGif(activeItem.gif, `Animated character reaction: ${activeItem.status}`, activeItem.status);
-      renderAnswerPage();
+    function selectQuestion(index) {
+      runSwipe(() => {
+        activeIndex = index;
+        activePage = 0;
+        updateQuestionHighlight();
+        switchCharacter(dialogue[index].gif, `Ryu reaction for: ${dialogue[index].question}`);
+        updateDialogue();
+      });
     }
 
-    function renderAnswerPage() {
-      if (!activeItem) return;
-      answerQuestion.textContent = activeItem.question;
-      answerText.textContent = activeItem.pages[activePage];
-      const total = activeItem.pages.length;
-      const hasNext = activePage < total - 1;
-      nextButton.classList.toggle("hidden", !hasNext);
-      pageCounter.textContent = total > 1 ? `${activePage + 1} / ${total}` : "";
-      dialogueStatus.textContent = total > 1 ? `Answer page ${activePage + 1} / ${total}` : "Answer";
+    function updateDialogue() {
+      if (activeIndex === null) {
+        dialogueText.textContent = "HEY — WELCOME TO MY DIALOGUE SYSTEM.\nPICK A QUESTION BELOW TO GET STARTED.";
+        dialogueQuestion.textContent = "Choose a response.";
+        pageCount.textContent = "";
+        nextButton.textContent = "▼";
+        nextButton.setAttribute("aria-label", "Choose a question below");
+        return;
+      }
+
+      const item = dialogue[activeIndex];
+      dialogueText.textContent = item.pages[activePage];
+      dialogueQuestion.textContent = item.question;
+      pageCount.textContent = item.pages.length > 1 ? `${activePage + 1}/${item.pages.length}` : "";
+
+      if (activePage < item.pages.length - 1) {
+        nextButton.textContent = "▼";
+        nextButton.setAttribute("aria-label", "Next dialogue page");
+      } else {
+        nextButton.textContent = "↺";
+        nextButton.setAttribute("aria-label", "Return to idle dialogue");
+      }
+    }
+
+    function resetDialogue(withSwipe = true) {
+      const reset = () => {
+        activeIndex = null;
+        activePage = 0;
+        updateQuestionHighlight();
+        switchCharacter(idleGif, "Ryu character idle animation");
+        updateDialogue();
+      };
+      if (withSwipe) runSwipe(reset); else reset();
     }
 
     nextButton.addEventListener("click", () => {
-      if (!activeItem || activePage >= activeItem.pages.length - 1) return;
-      withSwipe(() => {
-        activePage += 1;
-        renderAnswerPage();
-      });
+      if (activeIndex === null) return;
+      const item = dialogue[activeIndex];
+      if (activePage < item.pages.length - 1) {
+        runSwipe(() => {
+          activePage += 1;
+          updateDialogue();
+        });
+      } else {
+        resetDialogue(true);
+      }
     });
 
-    backButton.addEventListener("click", () => withSwipe(renderQuestions));
+    resetButton.addEventListener("click", () => resetDialogue(true));
 
-    document.querySelectorAll("[data-external]").forEach(link => {
-      link.addEventListener("click", event => {
-        event.preventDefault();
-        const destination = link.href;
-        withSwipe(() => { window.location.href = destination; });
+    document.addEventListener("click", event => {
+      const link = event.target.closest(".external-action");
+      if (!link) return;
+      event.preventDefault();
+      const href = link.href;
+      const popup = window.open("about:blank", "_blank");
+      runSwipe(() => {
+        if (popup) popup.location.href = href;
+        else window.location.href = href;
       });
     });
 
     document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && activeItem) {
-        withSwipe(renderQuestions);
-      }
+      if (event.key === "Escape" && activeIndex !== null && !transitioning) resetDialogue(true);
+      if ((event.key === "Enter" || event.key === "ArrowRight") && activeIndex !== null && !transitioning) nextButton.click();
     });
 
-    updateTokyoDate();
-    window.setInterval(updateTokyoDate, 60000);
+    window.addEventListener("resize", fitCanvas);
+    renderLinks();
     renderQuestions();
+    updateTokyoDate();
+    updateDialogue();
+    fitCanvas();
+    window.setInterval(updateTokyoDate, 60_000);
   </script>
 </body>
 </html>
