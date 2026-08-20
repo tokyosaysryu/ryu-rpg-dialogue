@@ -19,19 +19,27 @@
 
     * { box-sizing: border-box; }
 
-    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+    html, body {
+      margin: 0;
+      min-width: 1080px;
+      min-height: 610px;
+      background: var(--bg);
+      color: var(--text);
+    }
 
     body {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       display: grid;
       place-items: center;
-      padding: 24px;
+      padding: 0;
     }
 
     button { font: inherit; }
 
     .game {
-      width: min(900px, 100%);
+      position: relative;
+      width: 1080px;
+      height: 610px;
       border: 1px solid var(--line);
       background: var(--panel);
       box-shadow: 0 24px 80px var(--shadow);
@@ -40,23 +48,35 @@
 
     .stage {
       position: relative;
-      aspect-ratio: 16 / 9;
-      min-height: 260px;
+      width: 100%;
+      height: 330px;
       background: #0a0b0f;
       overflow: hidden;
       display: grid;
       place-items: center;
     }
 
-    .stage::before {
-      content: "";
+    .background-layer {
       position: absolute;
       inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .background-fallback {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
       background:
         linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        #0a0b0f;
       background-size: 36px 36px;
-      pointer-events: none;
     }
 
     .character {
@@ -69,13 +89,16 @@
       transition: opacity .14s ease, transform .18s ease;
     }
 
-    .character.switching { opacity: .25; transform: scale(.985); }
+    .character.switching {
+      opacity: .25;
+      transform: scale(.985);
+    }
 
     .status {
       position: absolute;
       top: 16px;
       left: 16px;
-      z-index: 2;
+      z-index: 3;
       padding: 7px 10px;
       border: 1px solid var(--line);
       background: rgba(8,9,12,.76);
@@ -87,13 +110,14 @@
     }
 
     .dialogue {
+      height: 280px;
       border-top: 1px solid var(--line);
-      padding: clamp(18px, 3vw, 30px);
-      min-height: 280px;
+      padding: 22px 28px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 22px;
+      gap: 16px;
+      background: rgba(17,19,25,.98);
     }
 
     .speaker {
@@ -105,88 +129,181 @@
       font-weight: 700;
       letter-spacing: .12em;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .speaker::before { content: "◆"; font-size: 10px; }
 
     .dialogue-text {
       margin: 0;
-      font-size: clamp(20px, 3vw, 30px);
-      line-height: 1.3;
+      font-size: 24px;
+      line-height: 1.34;
       letter-spacing: -.02em;
-      max-width: 760px;
+      max-width: 940px;
+    }
+
+    .dialogue-meta {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .hint {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 14px;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .page-indicator {
+      flex: 0 0 auto;
+      font-variant-numeric: tabular-nums;
     }
 
     .choices {
       display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .choice, .back {
-      width: 100%;
+    .choice,
+    .nav-button {
       border: 1px solid var(--line);
       background: var(--panel-2);
       color: var(--text);
-      padding: 15px 16px;
-      text-align: left;
       cursor: pointer;
       transition: background .15s ease, border-color .15s ease, transform .15s ease;
     }
 
     .choice {
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 14px;
       display: grid;
       grid-template-columns: 28px 1fr 18px;
       align-items: center;
       gap: 10px;
+      text-align: left;
     }
 
-    .choice .num { color: var(--muted); font-size: 12px; }
-    .choice .arrow { color: var(--muted); transition: transform .15s ease, color .15s ease; }
+    .choice .num {
+      color: var(--muted);
+      font-size: 12px;
+    }
 
-    .choice:hover, .choice:focus-visible, .back:hover, .back:focus-visible {
+    .choice .arrow {
+      color: var(--muted);
+      transition: transform .15s ease, color .15s ease;
+    }
+
+    .choice:hover,
+    .choice:focus-visible,
+    .nav-button:hover,
+    .nav-button:focus-visible {
       background: #1d2028;
       border-color: var(--accent);
       outline: none;
     }
 
-    .choice:hover .arrow, .choice:focus-visible .arrow {
+    .choice:hover .arrow,
+    .choice:focus-visible .arrow {
       transform: translateX(3px);
       color: var(--accent);
     }
 
-    .choice:active, .back:active { transform: scale(.995); }
+    .choice:active,
+    .nav-button:active {
+      transform: scale(.995);
+    }
 
-    .back {
-      max-width: 220px;
+    .answer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .nav-button {
+      min-width: 180px;
+      padding: 12px 16px;
       text-align: center;
-      background: transparent;
+    }
+
+    .next-button {
+      margin-left: auto;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #090909;
+      font-weight: 700;
+    }
+
+    .next-button:hover,
+    .next-button:focus-visible {
+      background: #ff8c49;
+      border-color: #ff8c49;
+    }
+
+    .swipe-transition {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      transform: translateX(-105%);
+      background: #08090c;
+    }
+
+    .swipe-transition::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 7px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .swipe-transition.play {
+      animation: swipeAcross 560ms cubic-bezier(.72,0,.2,1) both;
+    }
+
+    @keyframes swipeAcross {
+      0% { transform: translateX(-105%); }
+      46% { transform: translateX(0); }
+      54% { transform: translateX(0); }
+      100% { transform: translateX(105%); }
     }
 
     .hidden { display: none !important; }
 
-    @media (max-width: 560px) {
-      body { padding: 0; }
-      .game { border-left: 0; border-right: 0; }
-      .stage { aspect-ratio: 4 / 3; }
-      .dialogue { min-height: 330px; }
-    }
-
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { transition: none !important; }
+      *, *::before, *::after {
+        transition: none !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
     }
   </style>
 </head>
 <body>
   <main class="game" aria-label="Interactive RPG dialogue">
     <section class="stage" aria-label="Character animation">
+      <div class="background-fallback" aria-hidden="true"></div>
+
+      <!-- Replace this file with your own PNG or GIF. If you change the extension, update this src too. -->
+      <img
+        id="backgroundLayer"
+        class="background-layer"
+        src="assets/background.gif"
+        alt=""
+        aria-hidden="true"
+      />
+
       <div class="status" id="status">Idle</div>
+
       <img
         id="character"
         class="character"
@@ -201,43 +318,79 @@
         <p class="dialogue-text" id="dialogueText" aria-live="polite">
           What would you like to know?
         </p>
-        <p class="hint" id="hint">Choose a question.</p>
+        <div class="dialogue-meta">
+          <p class="hint" id="hint">Choose a question.</p>
+          <span class="page-indicator" id="pageIndicator"></span>
+        </div>
       </div>
 
       <div class="choices" id="choices" aria-label="Dialogue choices"></div>
-      <button class="back hidden" id="backButton" type="button">← Back to questions</button>
+
+      <div class="answer-nav hidden" id="answerNav">
+        <button class="nav-button" id="backButton" type="button">← Back to questions</button>
+        <button class="nav-button next-button hidden" id="nextButton" type="button">Next →</button>
+      </div>
     </section>
+
+    <div class="swipe-transition" id="swipeTransition" aria-hidden="true"></div>
   </main>
 
   <script>
     const dialogue = [
       {
-        question: "Why do you want to work with us?",
-        answer: "I think it's awesome",
+        question: "Why would you want to work with us?",
+        pages: [
+          "Because Fudge seem to care about the same thing I do — using animation to make the delivery of ideas feel genuine, engaging and memorable.",
+          "I also like the idea of working with a small team where people actually bounce ideas off each other and make things better together."
+        ],
         gif: "assets/reaction-awesome.gif",
         status: "Excited"
       },
       {
-        question: "What do you like to do?",
-        answer: "I like to make cool things.",
+        question: "Where are you based?",
+        pages: [
+          "Tokyo, Japan — surrounded by plenty of good food, visual inspiration and far too many sub cultures and hobbies to get into."
+        ],
+        gif: "assets/reaction-tokyo.gif",
+        status: "Tokyo"
+      },
+      {
+        question: "What do you like to do with your time?",
+        pages: [
+          "Mostly making things I'm curious about. I experiment with 3D, motion, interactive design and occasionally work on my own game.",
+          "When I’m away from the screen, I’m usually spending time with my family or making camp fire."
+        ],
         gif: "assets/reaction-make.gif",
         status: "Making things"
       },
       {
-        question: "Where do you live?",
-        answer: "I'm based in Tokyo, Japan.",
-        gif: "assets/reaction-tokyo.gif",
-        status: "Tokyo"
+        question: "Tell us a little about yourself.",
+        pages: [
+          "I’m a motion-led designer with 8+ years across animation, 3D, branding and film.",
+          "I started out studying architecture, somehow ended up making things move, and never really looked back.",
+          "I’m a curious person by nature, love learning new tools, and probably spend more time than necessary fixing tiny details nobody else notices."
+        ],
+        gif: "assets/reaction-about.gif",
+        status: "About me"
       }
     ];
 
     const idleGif = "assets/idle.gif";
+
     const character = document.getElementById("character");
     const status = document.getElementById("status");
     const dialogueText = document.getElementById("dialogueText");
     const hint = document.getElementById("hint");
+    const pageIndicator = document.getElementById("pageIndicator");
     const choices = document.getElementById("choices");
+    const answerNav = document.getElementById("answerNav");
     const backButton = document.getElementById("backButton");
+    const nextButton = document.getElementById("nextButton");
+    const swipeTransition = document.getElementById("swipeTransition");
+
+    let activeItem = null;
+    let activePage = 0;
+    let isTransitioning = false;
 
     function switchGif(src, alt, label) {
       character.classList.add("switching");
@@ -246,45 +399,92 @@
         character.alt = alt;
         status.textContent = label;
         character.classList.remove("switching");
-      }, 120);
+      }, 110);
     }
 
-    function renderQuestions() {
-      dialogueText.textContent = "What would you like to know?";
-      hint.textContent = "Choose a question.";
-      choices.innerHTML = "";
-      choices.classList.remove("hidden");
-      backButton.classList.add("hidden");
-      switchGif(idleGif, "Animated character in an idle pose", "Idle");
+    function runSwipe(update) {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      swipeTransition.classList.remove("play");
+      void swipeTransition.offsetWidth;
+      swipeTransition.classList.add("play");
 
-      dialogue.forEach((item, index) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "choice";
-        button.innerHTML = `
-          <span class="num">0${index + 1}</span>
-          <span>${item.question}</span>
-          <span class="arrow">→</span>
-        `;
-        button.addEventListener("click", () => showAnswer(item));
-        choices.appendChild(button);
-      });
+      window.setTimeout(update, 265);
+
+      window.setTimeout(() => {
+        swipeTransition.classList.remove("play");
+        isTransitioning = false;
+      }, 575);
+    }
+
+    function renderQuestions(withTransition = false) {
+      const render = () => {
+        activeItem = null;
+        activePage = 0;
+        dialogueText.textContent = "What would you like to know?";
+        hint.textContent = "Choose a question.";
+        pageIndicator.textContent = "";
+        choices.innerHTML = "";
+        choices.classList.remove("hidden");
+        answerNav.classList.add("hidden");
+        switchGif(idleGif, "Animated character in an idle pose", "Idle");
+
+        dialogue.forEach((item, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice";
+          button.innerHTML = `
+            <span class="num">0${index + 1}</span>
+            <span>${item.question}</span>
+            <span class="arrow">→</span>
+          `;
+          button.addEventListener("click", () => showAnswer(item));
+          choices.appendChild(button);
+        });
+      };
+
+      if (withTransition) runSwipe(render);
+      else render();
+    }
+
+    function updateAnswerPage() {
+      const pages = activeItem.pages;
+      dialogueText.textContent = pages[activePage];
+      hint.textContent = activeItem.question;
+      pageIndicator.textContent = pages.length > 1 ? `${activePage + 1} / ${pages.length}` : "";
+      nextButton.classList.toggle("hidden", activePage >= pages.length - 1);
+      nextButton.textContent = activePage < pages.length - 1 ? "Next →" : "";
     }
 
     function showAnswer(item) {
-      dialogueText.textContent = item.answer;
-      hint.textContent = item.question;
-      choices.classList.add("hidden");
-      backButton.classList.remove("hidden");
-      switchGif(item.gif, `Animated character reaction: ${item.status}`, item.status);
-      backButton.focus();
+      runSwipe(() => {
+        activeItem = item;
+        activePage = 0;
+        choices.classList.add("hidden");
+        answerNav.classList.remove("hidden");
+        switchGif(item.gif, `Animated character reaction: ${item.status}`, item.status);
+        updateAnswerPage();
+      });
     }
 
-    backButton.addEventListener("click", renderQuestions);
+    function showNextPage() {
+      if (!activeItem || activePage >= activeItem.pages.length - 1) return;
+      runSwipe(() => {
+        activePage += 1;
+        updateAnswerPage();
+      });
+    }
+
+    backButton.addEventListener("click", () => renderQuestions(true));
+    nextButton.addEventListener("click", showNextPage);
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !backButton.classList.contains("hidden")) {
-        renderQuestions();
+      if (event.key === "Escape" && activeItem && !isTransitioning) {
+        renderQuestions(true);
+      }
+
+      if ((event.key === "Enter" || event.key === "ArrowRight") && activeItem && !nextButton.classList.contains("hidden") && !isTransitioning) {
+        showNextPage();
       }
     });
 
