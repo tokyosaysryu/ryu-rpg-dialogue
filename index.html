@@ -10,161 +10,166 @@
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #2b2030;
-      --ink-2: #3a2b43;
-      --purple: #58416c;
-      --purple-hi: #7b5c96;
-      --purple-low: #44334f;
-      --yellow: #f2c65b;
-      --yellow-hi: #ffe58b;
-      --yellow-low: #c58d45;
-      --sand: #c99369;
-      --sand-hi: #dfb38a;
-      --cream: #ebd7af;
-      --cream-hi: #f8e9c9;
-      --teal: #3ec1ae;
-      --green: #62c56b;
-      --pink: #e95d83;
-      --blue: #48aac7;
-      --lilac: #9474c7;
-      --text-dark: #392b42;
-      --text-light: #fff0d3;
-      --pixel: 4px;
+      --ink:#2b2030;
+      --ink-2:#3a2b43;
+      --purple:#58416c;
+      --purple-hi:#7b5c96;
+      --purple-low:#44334f;
+      --yellow:#f2c65b;
+      --yellow-hi:#ffe58b;
+      --yellow-low:#c58d45;
+      --sand:#c99369;
+      --sand-hi:#dfb38a;
+      --cream:#ebd7af;
+      --cream-hi:#f8e9c9;
+      --teal:#3ec1ae;
+      --green:#62c56b;
+      --pink:#e95d83;
+      --blue:#48aac7;
+      --lilac:#9474c7;
+      --text-dark:#392b42;
+      --text-light:#fff0d3;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing:border-box; }
 
     html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      background: #1e1723;
-      overflow: hidden;
+      margin:0;
+      width:100%;
+      min-width:100%;
+      min-height:100%;
+      background:#1e1723;
     }
 
     body {
-      display: grid;
-      place-items: center;
-      font-family: "Pixelify Sans", monospace;
-      color: var(--text-light);
-      image-rendering: pixelated;
+      min-height:100dvh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      overflow:auto;
+      font-family:"Pixelify Sans", monospace;
+      color:var(--text-light);
+      image-rendering:pixelated;
     }
 
-    button, a { font: inherit; }
+    button, a { font:inherit; }
+
+    .viewport {
+      position:relative;
+      flex:0 0 auto;
+    }
 
     .canvas {
-      position: relative;
-      width: 1420px;
-      height: 610px;
-      flex: 0 0 auto;
-      overflow: hidden;
-      background: var(--ink);
-      border: 4px solid #17111b;
+      position:absolute;
+      left:0;
+      top:0;
+      width:1420px;
+      height:700px;
+      overflow:hidden;
+      background:var(--ink);
+      border:4px solid #17111b;
       box-shadow:
         inset 0 0 0 4px #4d3b55,
         inset 0 0 0 8px #241b29,
         12px 12px 0 rgba(0,0,0,.28);
-      transform-origin: center center;
+      transform-origin:top left;
     }
 
     .canvas::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 50;
-      pointer-events: none;
-      background: repeating-linear-gradient(
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:50;
+      pointer-events:none;
+      background:repeating-linear-gradient(
         to bottom,
         rgba(255,255,255,.018) 0,
         rgba(255,255,255,.018) 1px,
         transparent 1px,
         transparent 4px
       );
-      mix-blend-mode: soft-light;
+      mix-blend-mode:soft-light;
     }
 
     .topbar {
-      height: 64px;
-      padding: 0 28px 0 38px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #271d2c;
-      border-bottom: 5px solid #120e16;
-      box-shadow: inset 0 -3px 0 #4a3952;
-      position: relative;
-      z-index: 3;
+      position:relative;
+      z-index:3;
+      height:68px;
+      padding:0 30px 0 38px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#271d2c;
+      border-bottom:5px solid #120e16;
+      box-shadow:inset 0 -3px 0 #4a3952;
     }
 
     .brand,
     .tokyo-clock {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      white-space: nowrap;
+      display:flex;
+      align-items:center;
+      gap:18px;
+      font-weight:700;
+      letter-spacing:2px;
+      white-space:nowrap;
     }
 
-    .brand { font-size: 31px; }
-    .tokyo-clock { font-size: 28px; }
+    .brand { font-size:31px; }
+    .tokyo-clock { font-size:28px; }
 
     .signal {
-      display: grid;
-      grid-template-columns: repeat(3, 11px);
-      gap: 4px;
-      align-items: end;
-      width: 41px;
-      height: 28px;
+      display:grid;
+      grid-template-columns:repeat(3,11px);
+      gap:4px;
+      align-items:end;
+      width:41px;
+      height:28px;
     }
 
     .signal i {
-      display: block;
-      width: 11px;
-      background: var(--pink);
-      box-shadow: 3px -3px 0 #2b2030;
-    }
-    .signal i:nth-child(1) { height: 14px; }
-    .signal i:nth-child(2) { height: 21px; background: #ee6a69; }
-    .signal i:nth-child(3) { height: 27px; background: #50b99f; }
-
-    .tiny-face,
-    .sound-icon {
-      width: 32px;
-      height: 32px;
-      display: grid;
-      place-items: center;
-      color: var(--ink);
-      background: var(--cream);
-      border: 3px solid #fff0cf;
-      box-shadow: 3px 3px 0 #7d5c66;
-      font-size: 20px;
+      display:block;
+      width:11px;
+      background:var(--pink);
+      box-shadow:3px -3px 0 #2b2030;
     }
 
+    .signal i:nth-child(1) { height:14px; }
+    .signal i:nth-child(2) { height:21px; background:#ee6a69; }
+    .signal i:nth-child(3) { height:27px; background:#50b99f; }
+
+    .tiny-face {
+      width:32px;
+      height:32px;
+      display:grid;
+      place-items:center;
+      color:var(--ink);
+      background:var(--cream);
+      border:3px solid #fff0cf;
+      box-shadow:3px 3px 0 #7d5c66;
+      font-size:20px;
+    }
+
     .sound-icon {
-      color: var(--green);
-      background: transparent;
-      border: 0;
-      box-shadow: none;
-      font-size: 34px;
-      width: auto;
+      color:var(--green);
+      font-size:34px;
     }
 
     .workspace {
-      height: 546px;
-      padding: 10px;
-      display: grid;
-      grid-template-columns: 118px 1260px;
-      gap: 22px;
-      background: linear-gradient(#55455e, #4a3b54);
+      height:632px;
+      padding:10px;
+      display:grid;
+      grid-template-columns:118px 1260px;
+      gap:22px;
+      background:linear-gradient(#55455e,#4a3b54);
     }
 
     .sidebar {
-      position: relative;
-      height: 526px;
-      padding: 72px 12px 42px;
-      background: #33273b;
-      border: 4px solid #201825;
+      position:relative;
+      height:612px;
+      padding:72px 12px 48px;
+      background:#33273b;
+      border:4px solid #201825;
       box-shadow:
         inset 0 0 0 4px #665276,
         inset 0 0 0 8px #463650,
@@ -172,652 +177,663 @@
     }
 
     .rail-cap {
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      height: 45px;
-      display: grid;
-      place-items: center;
-      background: var(--purple-low);
-      color: #a98bc1;
-      border: 3px solid #211725;
-      box-shadow: inset 0 0 0 3px #6e5680, 4px 4px 0 #1b151f;
-      font-size: 24px;
+      position:absolute;
+      left:10px;
+      right:10px;
+      height:45px;
+      display:grid;
+      place-items:center;
+      background:var(--purple-low);
+      color:#a98bc1;
+      border:3px solid #211725;
+      box-shadow:inset 0 0 0 3px #6e5680,4px 4px 0 #1b151f;
+      font-size:24px;
     }
 
-    .rail-cap.top { top: 10px; }
-    .rail-cap.bottom { bottom: 10px; }
+    .rail-cap.top { top:10px; }
+    .rail-cap.bottom { bottom:10px; }
 
     .link-stack {
-      display: grid;
-      gap: 10px;
-      justify-items: center;
+      display:grid;
+      gap:12px;
+      justify-items:center;
     }
 
     .site-link {
-      position: relative;
-      width: 82px;
-      height: 66px;
-      display: grid;
-      place-items: center;
-      text-decoration: none;
-      color: #cdbde2;
-      background: #59456c;
-      border: 4px solid #211724;
-      box-shadow:
-        inset 0 0 0 4px #78638d,
-        5px 5px 0 #211724;
-      transition: transform .08s linear, filter .08s linear;
+      position:relative;
+      width:82px;
+      height:72px;
+      display:grid;
+      place-items:center;
+      text-decoration:none;
+      color:#cdbde2;
+      background:#59456c;
+      border:4px solid #211724;
+      box-shadow:inset 0 0 0 4px #78638d,5px 5px 0 #211724;
+      transition:transform .08s linear,filter .08s linear;
     }
 
     .site-link:first-child {
-      color: var(--ink);
-      background: var(--yellow);
-      box-shadow: inset 0 0 0 4px var(--yellow-hi), 5px 5px 0 #211724;
+      color:var(--ink);
+      background:var(--yellow);
+      box-shadow:inset 0 0 0 4px var(--yellow-hi),5px 5px 0 #211724;
     }
 
     .site-link:hover,
     .site-link:focus-visible {
-      outline: 0;
-      filter: brightness(1.08);
-      transform: translate(-2px, -2px);
+      outline:0;
+      filter:brightness(1.08);
+      transform:translate(-2px,-2px);
     }
 
-    .site-link:active { transform: translate(2px, 2px); }
+    .site-link:active { transform:translate(2px,2px); }
 
     .site-link .glyph {
-      font-size: 27px;
-      font-weight: 700;
-      line-height: 1;
+      font-size:27px;
+      font-weight:700;
+      line-height:1;
     }
 
     .site-link::after {
-      content: attr(data-label);
-      position: absolute;
-      left: calc(100% + 12px);
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 15;
-      display: none;
-      padding: 7px 10px;
-      background: var(--ink);
-      border: 3px solid var(--yellow);
-      color: var(--text-light);
-      font-size: 15px;
-      white-space: nowrap;
-      box-shadow: 4px 4px 0 #120d16;
+      content:attr(data-label);
+      position:absolute;
+      left:calc(100% + 12px);
+      top:50%;
+      transform:translateY(-50%);
+      z-index:15;
+      display:none;
+      padding:7px 10px;
+      background:var(--ink);
+      border:3px solid var(--yellow);
+      color:var(--text-light);
+      font-size:15px;
+      white-space:nowrap;
+      box-shadow:4px 4px 0 #120d16;
     }
 
     .site-link:hover::after,
-    .site-link:focus-visible::after { display: block; }
+    .site-link:focus-visible::after { display:block; }
 
     .main-area {
-      position: relative;
-      height: 526px;
+      position:relative;
+      height:612px;
     }
 
     .tabs {
-      position: absolute;
-      top: 0;
-      left: 18px;
-      z-index: 4;
-      height: 61px;
-      display: flex;
-      align-items: flex-end;
-      gap: 6px;
+      position:absolute;
+      top:0;
+      left:18px;
+      z-index:4;
+      height:65px;
+      display:flex;
+      align-items:flex-end;
+      gap:6px;
     }
 
     .tab {
-      height: 52px;
-      min-width: 215px;
-      padding: 0 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      color: #b39cc9;
-      background: #58436d;
-      border: 4px solid #231728;
-      border-bottom: 0;
-      box-shadow: inset 0 0 0 4px #72598a;
-      font-size: 23px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      height:54px;
+      min-width:215px;
+      padding:0 26px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      color:#b39cc9;
+      background:#58436d;
+      border:4px solid #231728;
+      border-bottom:0;
+      box-shadow:inset 0 0 0 4px #72598a;
+      font-size:23px;
+      font-weight:700;
+      letter-spacing:1px;
     }
 
     .tab.active {
-      height: 61px;
-      color: var(--text-dark);
-      background: var(--yellow);
-      box-shadow: inset 0 0 0 4px var(--yellow-hi);
+      height:65px;
+      color:var(--text-dark);
+      background:var(--yellow);
+      box-shadow:inset 0 0 0 4px var(--yellow-hi);
     }
 
     .window-actions {
-      position: absolute;
-      right: 5px;
-      top: 0;
-      z-index: 6;
-      display: flex;
-      gap: 8px;
+      position:absolute;
+      right:5px;
+      top:0;
+      z-index:6;
+      display:flex;
+      gap:8px;
     }
 
     .window-btn {
-      width: 78px;
-      height: 60px;
-      display: grid;
-      place-items: center;
-      color: var(--cream);
-      background: #59456d;
-      border: 4px solid #211724;
-      box-shadow: inset 0 0 0 4px #765f89, 4px 4px 0 #201724;
-      text-decoration: none;
-      font-size: 30px;
-      cursor: pointer;
+      width:78px;
+      height:62px;
+      display:grid;
+      place-items:center;
+      color:var(--cream);
+      background:#59456d;
+      border:4px solid #211724;
+      box-shadow:inset 0 0 0 4px #765f89,4px 4px 0 #201724;
+      text-decoration:none;
+      font-size:30px;
+      cursor:pointer;
     }
 
     .window-btn:hover,
-    .window-btn:focus-visible { outline: 0; filter: brightness(1.12); }
+    .window-btn:focus-visible { outline:0; filter:brightness(1.12); }
 
     .panel {
-      position: absolute;
-      left: 0;
-      top: 56px;
-      width: 1260px;
-      height: 470px;
-      padding: 24px 24px 18px;
-      background: var(--yellow);
-      border: 5px solid #241a2b;
+      position:absolute;
+      left:0;
+      top:60px;
+      width:1260px;
+      height:552px;
+      padding:24px 24px 20px;
+      background:var(--yellow);
+      border:5px solid #241a2b;
       box-shadow:
         inset 0 0 0 5px var(--yellow-hi),
         inset 0 0 0 10px var(--yellow-low),
         7px 7px 0 #2d2134;
-      clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px), 0 18px);
+      clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 18px,100% calc(100% - 18px),calc(100% - 18px) 100%,18px 100%,0 calc(100% - 18px),0 18px);
     }
 
     .panel-bolt {
-      position: absolute;
-      width: 23px;
-      height: 23px;
-      border: 3px solid #241a2b;
-      background: #43354f;
-      box-shadow: inset 4px 4px 0 #675475;
+      position:absolute;
+      width:23px;
+      height:23px;
+      border:3px solid #241a2b;
+      background:#43354f;
+      box-shadow:inset 4px 4px 0 #675475;
     }
-    .panel-bolt.a { left: 17px; top: 18px; }
-    .panel-bolt.b { right: 17px; top: 18px; }
+
+    .panel-bolt.a { left:17px; top:18px; }
+    .panel-bolt.b { right:17px; top:18px; }
 
     .top-content {
-      height: 240px;
-      display: grid;
-      grid-template-columns: 365px 1fr;
-      gap: 28px;
-      padding: 10px 18px 0;
+      height:270px;
+      display:grid;
+      grid-template-columns:365px 1fr;
+      gap:28px;
+      padding:10px 18px 0;
     }
 
     .portrait-wrap {
-      height: 232px;
-      display: grid;
-      grid-template-rows: 186px 38px;
-      gap: 8px;
+      height:260px;
+      display:grid;
+      grid-template-rows:212px 40px;
+      gap:8px;
     }
 
     .portrait-frame {
-      position: relative;
-      overflow: hidden;
-      background: #30263a;
-      border: 5px solid #312238;
-      box-shadow:
-        inset 0 0 0 5px #6b557b,
-        5px 5px 0 #9f684b;
-      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+      position:relative;
+      overflow:hidden;
+      background:#30263a;
+      border:5px solid #312238;
+      box-shadow:inset 0 0 0 5px #6b557b,5px 5px 0 #9f684b;
+      clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px);
     }
 
     .scene-bg,
     .character {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      image-rendering: pixelated;
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      image-rendering:pixelated;
     }
 
     .scene-bg {
-      z-index: 0;
-      background: linear-gradient(135deg,#2a2432,#4e3f59);
-      opacity: .9;
+      z-index:0;
+      object-fit:cover;
+      background:linear-gradient(135deg,#2a2432,#4e3f59);
+      opacity:.9;
     }
 
     .character {
-      z-index: 1;
-      object-fit: contain;
-      transform: scale(1.32) translateY(7px);
-      transform-origin: center bottom;
-      transition: opacity .08s linear, transform .12s linear;
+      z-index:1;
+      object-fit:contain;
+      transform:scale(1.32) translateY(7px);
+      transform-origin:center bottom;
+      transition:opacity .08s linear,transform .12s linear;
     }
 
-    .character.switching { opacity: .2; transform: scale(1.27) translateY(7px); }
+    .character.switching { opacity:.2; transform:scale(1.27) translateY(7px); }
 
     .meter {
-      display: grid;
-      grid-template-columns: 70px 1fr;
-      gap: 7px;
+      display:grid;
+      grid-template-columns:70px 1fr;
+      gap:7px;
     }
 
     .mood-face {
-      display: grid;
-      place-items: center;
-      color: var(--text-dark);
-      background: #5b4470;
-      border: 4px solid #2c2032;
-      box-shadow: inset 0 0 0 4px #8a6da4, 4px 4px 0 #38273e;
-      font-size: 24px;
+      display:grid;
+      place-items:center;
+      color:var(--text-dark);
+      background:#5b4470;
+      border:4px solid #2c2032;
+      box-shadow:inset 0 0 0 4px #8a6da4,4px 4px 0 #38273e;
+      font-size:24px;
     }
 
     .meter-track {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
-      padding: 7px;
-      background: #453450;
-      border: 4px solid #2c2032;
-      box-shadow: inset 0 0 0 3px #755987, 4px 4px 0 #38273e;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:5px;
+      padding:7px;
+      background:#453450;
+      border:4px solid #2c2032;
+      box-shadow:inset 0 0 0 3px #755987,4px 4px 0 #38273e;
     }
 
-    .meter-track i { display: block; border: 2px solid rgba(43,32,48,.45); }
-    .meter-track i:nth-child(1) { background: var(--pink); }
-    .meter-track i:nth-child(2) { background: var(--yellow); }
-    .meter-track i:nth-child(3) { background: #56b67a; }
-    .meter-track i:nth-child(4) { background: var(--teal); }
+    .meter-track i { display:block; border:2px solid rgba(43,32,48,.45); }
+    .meter-track i:nth-child(1) { background:var(--pink); }
+    .meter-track i:nth-child(2) { background:var(--yellow); }
+    .meter-track i:nth-child(3) { background:#56b67a; }
+    .meter-track i:nth-child(4) { background:var(--teal); }
 
     .dialogue-side {
-      height: 232px;
-      display: grid;
-      grid-template-rows: 58px 1fr;
-      gap: 10px;
+      height:260px;
+      display:grid;
+      grid-template-rows:62px 1fr;
+      gap:10px;
     }
 
     .name-row {
-      display: grid;
-      grid-template-columns: 1fr 194px;
-      gap: 18px;
+      display:grid;
+      grid-template-columns:1fr 194px;
+      gap:18px;
     }
 
     .nameplate {
-      display: flex;
-      align-items: center;
-      padding: 0 26px;
-      color: var(--yellow-hi);
-      background: #58406c;
-      border: 5px solid #2b1e32;
-      box-shadow: inset 0 0 0 5px #805e98, 4px 4px 0 #9b684c;
-      clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
-      font-size: 32px;
-      letter-spacing: 4px;
+      display:flex;
+      align-items:center;
+      padding:0 26px;
+      color:var(--yellow-hi);
+      background:#58406c;
+      border:5px solid #2b1e32;
+      box-shadow:inset 0 0 0 5px #805e98,4px 4px 0 #9b684c;
+      clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px);
+      font-size:32px;
+      letter-spacing:4px;
     }
 
     .badge-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      color: #9b5f54;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      color:#9b5f54;
     }
 
     .shield {
-      width: 56px;
-      height: 58px;
-      display: grid;
-      place-items: center;
-      color: var(--text-dark);
-      background: var(--teal);
-      border: 5px solid #302139;
-      box-shadow: inset 0 0 0 4px #78dfc7;
-      clip-path: polygon(10% 0, 90% 0, 90% 68%, 50% 100%, 10% 68%);
-      font-size: 19px;
-      font-weight: 700;
+      width:56px;
+      height:58px;
+      display:grid;
+      place-items:center;
+      color:var(--text-dark);
+      background:var(--teal);
+      border:5px solid #302139;
+      box-shadow:inset 0 0 0 4px #78dfc7;
+      clip-path:polygon(10% 0,90% 0,90% 68%,50% 100%,10% 68%);
+      font-size:19px;
+      font-weight:700;
     }
 
     .badge-bars {
-      display: grid;
-      grid-template-columns: repeat(5, 6px);
-      gap: 7px;
-      height: 42px;
-      align-items: stretch;
+      display:grid;
+      grid-template-columns:repeat(5,6px);
+      gap:7px;
+      height:42px;
+      align-items:stretch;
     }
 
-    .badge-bars i { background: #a65f50; }
+    .badge-bars i { background:#a65f50; }
 
     .dialogue-box {
-      position: relative;
-      padding: 18px 58px 18px 28px;
-      color: var(--text-light);
-      background: #302537;
-      border: 5px solid #241a2b;
-      box-shadow: inset 0 0 0 3px #3e3046, 4px 4px 0 #b27a4d;
-      overflow: hidden;
+      position:relative;
+      padding:18px 104px 18px 28px;
+      color:var(--text-light);
+      background:#302537;
+      border:5px solid #241a2b;
+      box-shadow:inset 0 0 0 3px #3e3046,4px 4px 0 #b27a4d;
+      overflow:hidden;
     }
 
     .dialogue-text {
-      margin: 0;
-      max-width: 760px;
-      font-size: 24px;
-      line-height: 1.23;
-      letter-spacing: .4px;
-      white-space: pre-line;
+      margin:0;
+      max-width:760px;
+      font-size:24px;
+      line-height:1.24;
+      letter-spacing:.4px;
+      white-space:pre-line;
     }
 
     .dialogue-question {
-      display: block;
-      margin-top: 8px;
-      color: #c7a9d2;
-      font-size: 15px;
+      display:block;
+      margin-top:8px;
+      color:#c7a9d2;
+      font-size:15px;
     }
 
     .dialogue-nav {
-      position: absolute;
-      right: 15px;
-      bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      position:absolute;
+      right:15px;
+      bottom:15px;
+      display:flex;
+      align-items:center;
+      gap:8px;
     }
 
     .page-count {
-      color: #d5b9d9;
-      font-size: 14px;
-      min-width: 38px;
-      text-align: right;
+      color:#d5b9d9;
+      font-size:14px;
+      min-width:38px;
+      text-align:right;
     }
 
     .next-btn {
-      min-width: 49px;
-      height: 39px;
-      padding: 0 10px;
-      display: grid;
-      place-items: center;
-      color: var(--text-dark);
-      background: var(--yellow);
-      border: 4px solid #211724;
-      box-shadow: inset 0 0 0 3px var(--yellow-hi), 4px 4px 0 #1e1522;
-      cursor: pointer;
-      font-size: 18px;
+      min-width:76px;
+      height:42px;
+      padding:0 10px;
+      display:grid;
+      place-items:center;
+      color:var(--text-dark);
+      background:var(--yellow);
+      border:4px solid #211724;
+      box-shadow:inset 0 0 0 3px var(--yellow-hi),4px 4px 0 #1e1522;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:700;
     }
 
     .next-btn:hover,
-    .next-btn:focus-visible { outline: 0; filter: brightness(1.08); }
+    .next-btn:focus-visible { outline:0; filter:brightness(1.08); }
+
+    .next-btn:disabled {
+      opacity:.45;
+      cursor:default;
+      filter:none;
+    }
 
     .response-section {
-      height: 164px;
-      margin: 8px 18px 0;
-      border-top: 4px solid #b97859;
-      border-left: 4px solid #b97859;
-      border-right: 4px solid #d8a16e;
-      border-bottom: 4px solid #d8a16e;
-      background: var(--sand);
-      padding: 0 14px 12px;
-      box-shadow: inset 0 0 0 4px #d9a679;
+      height:224px;
+      margin:12px 18px 0;
+      border-top:4px solid #b97859;
+      border-left:4px solid #b97859;
+      border-right:4px solid #d8a16e;
+      border-bottom:4px solid #d8a16e;
+      background:var(--sand);
+      padding:0 14px 14px;
+      box-shadow:inset 0 0 0 4px #d9a679;
     }
 
     .response-title {
-      width: 290px;
-      height: 23px;
-      margin: -14px auto 3px;
-      padding: 0 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      color: #915846;
-      background: var(--sand);
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      width:310px;
+      height:25px;
+      margin:-14px auto 5px;
+      padding:0 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      color:#915846;
+      background:var(--sand);
+      font-size:19px;
+      font-weight:700;
+      letter-spacing:1px;
     }
 
     .response-title::before,
     .response-title::after {
-      content: "◆ ◆";
-      font-size: 9px;
-      letter-spacing: 5px;
-      opacity: .55;
+      content:"◆ ◆";
+      font-size:9px;
+      letter-spacing:5px;
+      opacity:.55;
     }
 
     .questions {
-      display: grid;
-      gap: 5px;
+      display:grid;
+      gap:7px;
     }
 
     .question-btn {
-      width: 100%;
-      height: 31px;
-      display: grid;
-      grid-template-columns: 55px 1fr 48px;
-      align-items: center;
-      padding: 0 8px 0 0;
-      border: 3px solid #2a1d31;
-      background: var(--cream);
-      color: var(--text-dark);
-      box-shadow: inset 0 0 0 2px var(--cream-hi), 4px 4px 0 #5f3f44;
-      cursor: pointer;
-      text-align: left;
-      transition: transform .05s linear, filter .08s linear;
+      width:100%;
+      height:45px;
+      display:grid;
+      grid-template-columns:62px 1fr 54px;
+      align-items:center;
+      padding:0 9px 0 0;
+      border:3px solid #2a1d31;
+      background:var(--cream);
+      color:var(--text-dark);
+      box-shadow:inset 0 0 0 2px var(--cream-hi),4px 4px 0 #5f3f44;
+      cursor:pointer;
+      text-align:left;
+      transition:transform .05s linear,filter .08s linear;
     }
 
     .question-btn:hover,
     .question-btn:focus-visible {
-      outline: 0;
-      filter: brightness(1.08);
-      transform: translate(-1px,-1px);
+      outline:0;
+      filter:brightness(1.08);
+      transform:translate(-1px,-1px);
     }
 
     .question-btn.active {
-      background: #fff0c9;
-      border-color: #5a3a52;
-      box-shadow: inset 0 0 0 2px #fff7db, 4px 4px 0 #72434e;
+      background:#fff0c9;
+      border-color:#5a3a52;
+      box-shadow:inset 0 0 0 2px #fff7db,4px 4px 0 #72434e;
     }
 
     .q-number {
-      align-self: stretch;
-      display: grid;
-      place-items: center;
-      color: #fff4cf;
-      background: var(--blue);
-      border-right: 3px solid #2a1d31;
-      font-size: 21px;
-      text-shadow: 2px 2px 0 rgba(0,0,0,.28);
+      align-self:stretch;
+      display:grid;
+      place-items:center;
+      color:#fff4cf;
+      background:var(--blue);
+      border-right:3px solid #2a1d31;
+      font-size:25px;
+      text-shadow:2px 2px 0 rgba(0,0,0,.28);
     }
-    .question-btn:nth-child(2) .q-number { background: var(--green); }
-    .question-btn:nth-child(3) .q-number { background: var(--lilac); }
-    .question-btn:nth-child(4) .q-number { background: var(--pink); }
+
+    .question-btn:nth-child(2) .q-number { background:var(--green); }
+    .question-btn:nth-child(3) .q-number { background:var(--lilac); }
+    .question-btn:nth-child(4) .q-number { background:var(--pink); }
 
     .q-label {
-      padding: 0 18px;
-      font-size: 18px;
-      font-weight: 700;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      padding:0 20px;
+      font-size:23px;
+      font-weight:700;
+      line-height:1;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
     }
 
     .q-icon {
-      width: 38px;
-      height: 25px;
-      display: grid;
-      place-items: center;
-      justify-self: end;
-      color: var(--cream);
-      background: #352740;
-      border: 3px solid #211724;
-      box-shadow: inset 0 0 0 2px #5a4668;
-      font-size: 18px;
+      width:42px;
+      height:30px;
+      display:grid;
+      place-items:center;
+      justify-self:end;
+      color:var(--cream);
+      background:#352740;
+      border:3px solid #211724;
+      box-shadow:inset 0 0 0 2px #5a4668;
+      font-size:19px;
     }
 
     .swipe {
-      position: absolute;
-      inset: 0;
-      z-index: 40;
-      pointer-events: none;
-      transform: translateX(-105%);
-      background: #4d385f;
-      border-right: 12px solid var(--yellow);
-      box-shadow: inset -9px 0 0 #7e5b92;
+      position:absolute;
+      inset:0;
+      z-index:40;
+      pointer-events:none;
+      transform:translateX(-105%);
+      background:#4d385f;
+      border-right:12px solid var(--yellow);
+      box-shadow:inset -9px 0 0 #7e5b92;
     }
 
     .swipe::before {
-      content: "DIALOGUE.SYSTEM";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%,-50%);
-      color: var(--yellow-hi);
-      font-size: 38px;
-      letter-spacing: 4px;
+      content:"DIALOGUE.SYSTEM";
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      color:var(--yellow-hi);
+      font-size:38px;
+      letter-spacing:4px;
     }
 
-    .swipe.play { animation: pixelSwipe 560ms steps(10, end) both; }
+    .swipe.play { animation:pixelSwipe 560ms steps(10,end) both; }
 
     @keyframes pixelSwipe {
-      0% { transform: translateX(-105%); }
-      45% { transform: translateX(0); }
-      55% { transform: translateX(0); }
-      100% { transform: translateX(105%); }
+      0% { transform:translateX(-105%); }
+      45% { transform:translateX(0); }
+      55% { transform:translateX(0); }
+      100% { transform:translateX(105%); }
     }
 
-    @media (prefers-reduced-motion: reduce) {
+    @media (prefers-reduced-motion:reduce) {
       *, *::before, *::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
+        animation-duration:.01ms !important;
+        transition-duration:.01ms !important;
       }
     }
   </style>
 </head>
 <body>
-  <main class="canvas" id="canvas" aria-label="Interactive pixel dialogue system">
-    <header class="topbar">
-      <div class="brand">
-        <span class="signal" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="tiny-face" aria-hidden="true">■</span>
-        <span>DIALOGUE.SYSTEM</span>
-      </div>
-      <div class="tokyo-clock">
-        <span class="sound-icon" aria-hidden="true">◖))</span>
-        <span id="tokyoDate">TOKYO · THU 20 AUG 2026</span>
-      </div>
-    </header>
-
-    <div class="workspace">
-      <aside class="sidebar" aria-label="External links">
-        <div class="rail-cap top" aria-hidden="true">▲</div>
-        <nav class="link-stack" id="linkStack"></nav>
-        <div class="rail-cap bottom" aria-hidden="true">▼</div>
-      </aside>
-
-      <section class="main-area">
-        <div class="tabs" aria-label="Dialogue interface tabs">
-          <div class="tab active">▣ DIALOGUE</div>
-          <div class="tab">⚑ PROFILE</div>
-          <div class="tab">◇ SYSTEM</div>
+  <div class="viewport" id="viewport">
+    <main class="canvas" id="canvas" aria-label="Interactive pixel dialogue system">
+      <header class="topbar">
+        <div class="brand">
+          <span class="signal" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="tiny-face" aria-hidden="true">■</span>
+          <span>DIALOGUE.SYSTEM</span>
         </div>
-
-        <div class="window-actions">
-          <a class="window-btn external-action" href="https://github.com/tokyosaysryu/ryu-rpg-dialogue" target="_blank" rel="noreferrer" aria-label="Open GitHub repository">☰</a>
-          <button class="window-btn" id="resetButton" type="button" aria-label="Reset dialogue">×</button>
+        <div class="tokyo-clock">
+          <span class="sound-icon" aria-hidden="true">◖))</span>
+          <span id="tokyoDate">TOKYO · THU 20 AUG 2026</span>
         </div>
+      </header>
 
-        <section class="panel">
-          <span class="panel-bolt a" aria-hidden="true"></span>
-          <span class="panel-bolt b" aria-hidden="true"></span>
+      <div class="workspace">
+        <aside class="sidebar" aria-label="External links">
+          <div class="rail-cap top" aria-hidden="true">▲</div>
+          <nav class="link-stack" id="linkStack"></nav>
+          <div class="rail-cap bottom" aria-hidden="true">▼</div>
+        </aside>
 
-          <div class="top-content">
-            <div class="portrait-wrap">
-              <div class="portrait-frame">
-                <!-- Replace assets/background.gif with your own GIF, or change this src to a PNG. -->
-                <img class="scene-bg" src="assets/background.gif" alt="" aria-hidden="true" />
-                <img id="character" class="character" src="assets/idle.gif" alt="Ryu character idle animation" />
-              </div>
-              <div class="meter" aria-hidden="true">
-                <div class="mood-face">☻</div>
-                <div class="meter-track"><i></i><i></i><i></i><i></i></div>
-              </div>
-            </div>
-
-            <div class="dialogue-side">
-              <div class="name-row">
-                <div class="nameplate">RYU</div>
-                <div class="badge-row" aria-hidden="true">
-                  <div class="shield">RT</div>
-                  <div class="badge-bars"><i></i><i></i><i></i><i></i><i></i></div>
-                </div>
-              </div>
-
-              <div class="dialogue-box">
-                <p class="dialogue-text" id="dialogueText" aria-live="polite">HEY — WELCOME TO MY DIALOGUE SYSTEM.
-PICK A QUESTION BELOW TO GET STARTED.</p>
-                <span class="dialogue-question" id="dialogueQuestion">Choose a response.</span>
-                <div class="dialogue-nav">
-                  <span class="page-count" id="pageCount"></span>
-                  <button class="next-btn" id="nextButton" type="button" aria-label="Next dialogue page">▼</button>
-                </div>
-              </div>
-            </div>
+        <section class="main-area">
+          <div class="tabs" aria-label="Dialogue interface tabs">
+            <div class="tab active">▣ DIALOGUE</div>
+            <div class="tab">⚑ PROFILE</div>
+            <div class="tab">◇ SYSTEM</div>
           </div>
 
-          <section class="response-section">
-            <div class="response-title">CHOOSE A RESPONSE</div>
-            <div class="questions" id="questions"></div>
+          <div class="window-actions">
+            <a class="window-btn" href="https://github.com/tokyosaysryu/ryu-rpg-dialogue" target="_blank" rel="noreferrer" aria-label="Open GitHub repository">☰</a>
+            <button class="window-btn" id="resetButton" type="button" aria-label="Reset dialogue">×</button>
+          </div>
+
+          <section class="panel">
+            <span class="panel-bolt a" aria-hidden="true"></span>
+            <span class="panel-bolt b" aria-hidden="true"></span>
+
+            <div class="top-content">
+              <div class="portrait-wrap">
+                <div class="portrait-frame">
+                  <img class="scene-bg" src="assets/background.gif" alt="" aria-hidden="true" />
+                  <img id="character" class="character" src="assets/idle.gif" alt="Ryu character idle animation" />
+                </div>
+                <div class="meter" aria-hidden="true">
+                  <div class="mood-face">☻</div>
+                  <div class="meter-track"><i></i><i></i><i></i><i></i></div>
+                </div>
+              </div>
+
+              <div class="dialogue-side">
+                <div class="name-row">
+                  <div class="nameplate">RYU</div>
+                  <div class="badge-row" aria-hidden="true">
+                    <div class="shield">RT</div>
+                    <div class="badge-bars"><i></i><i></i><i></i><i></i><i></i></div>
+                  </div>
+                </div>
+
+                <div class="dialogue-box">
+                  <p class="dialogue-text" id="dialogueText" aria-live="polite">HEY — WELCOME TO MY DIALOGUE SYSTEM.
+PICK A QUESTION BELOW TO GET STARTED.</p>
+                  <span class="dialogue-question" id="dialogueQuestion">Choose a response.</span>
+                  <div class="dialogue-nav">
+                    <span class="page-count" id="pageCount"></span>
+                    <button class="next-btn" id="nextButton" type="button" aria-label="More dialogue" disabled>MORE ▼</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <section class="response-section">
+              <div class="response-title">CHOOSE A RESPONSE</div>
+              <div class="questions" id="questions"></div>
+            </section>
           </section>
         </section>
-      </section>
-    </div>
+      </div>
 
-    <div class="swipe" id="swipe" aria-hidden="true"></div>
-  </main>
+      <div class="swipe" id="swipe" aria-hidden="true"></div>
+    </main>
+  </div>
 
   <script>
+    const BASE_WIDTH = 1420;
+    const BASE_HEIGHT = 700;
+
     const externalLinks = [
-      { label: "Portfolio", glyph: "WEB", href: "https://www.ryutanaka.com/" },
-      { label: "GitHub", glyph: "GH", href: "https://github.com/tokyosaysryu" },
-      { label: "LinkedIn", glyph: "IN", href: "https://www.linkedin.com/" },
-      { label: "Behance", glyph: "BE", href: "https://www.behance.net/" },
-      { label: "Vimeo", glyph: "▶", href: "https://vimeo.com/" }
+      { label:"Portfolio", glyph:"WEB", href:"https://www.ryutanaka.com/" },
+      { label:"GitHub", glyph:"GH", href:"https://github.com/tokyosaysryu" },
+      { label:"LinkedIn", glyph:"IN", href:"https://www.linkedin.com/" },
+      { label:"Behance", glyph:"BE", href:"https://www.behance.net/" },
+      { label:"Vimeo", glyph:"▶", href:"https://vimeo.com/" }
     ];
 
     const dialogue = [
       {
-        question: "Why would you want to work with us?",
-        pages: [
+        question:"Why would you want to work with us?",
+        pages:[
           "Because Fudge seem to care about the same thing I do — using animation to make the delivery of ideas feel genuine, engaging and memorable.",
           "I also like the idea of working with a small team where people actually bounce ideas off each other and make things better together."
         ],
-        gif: "assets/reaction-awesome.gif"
+        gif:"assets/reaction-awesome.gif"
       },
       {
-        question: "Where are you based?",
-        pages: [
+        question:"Where are you based?",
+        pages:[
           "Tokyo, Japan — surrounded by plenty of good food, visual inspiration and far too many sub cultures and hobbies to get into."
         ],
-        gif: "assets/reaction-tokyo.gif"
+        gif:"assets/reaction-tokyo.gif"
       },
       {
-        question: "What do you like to do with your time?",
-        pages: [
+        question:"What do you like to do with your time?",
+        pages:[
           "Mostly making things I'm curious about. I experiment with 3D, motion, interactive design and occasionally work on my own game.",
           "When I’m away from the screen, I’m usually spending time with my family or making camp fire."
         ],
-        gif: "assets/reaction-make.gif"
+        gif:"assets/reaction-make.gif"
       },
       {
-        question: "Tell us a little about yourself.",
-        pages: [
+        question:"Tell us a little about yourself.",
+        pages:[
           "I’m a motion-led designer with 8+ years across animation, 3D, branding and film.",
           "I started out studying architecture, somehow ended up making things move, and never really looked back.",
           "I’m a curious person by nature, love learning new tools, and probably spend more time than necessary fixing tiny details nobody else notices."
         ],
-        gif: "assets/reaction-about.gif"
+        gif:"assets/reaction-about.gif"
       }
     ];
 
     const idleGif = "assets/idle.gif";
+    const viewport = document.getElementById("viewport");
     const canvas = document.getElementById("canvas");
     const linkStack = document.getElementById("linkStack");
     const questions = document.getElementById("questions");
@@ -835,18 +851,23 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
     let transitioning = false;
 
     function fitCanvas() {
-      const scale = Math.min(window.innerWidth / 1420, window.innerHeight / 610, 1);
+      const availableWidth = Math.max(280, window.innerWidth - 32);
+      const availableHeight = Math.max(240, window.innerHeight - 32);
+      const scale = Math.min(availableWidth / BASE_WIDTH, availableHeight / BASE_HEIGHT, 1);
+
+      viewport.style.width = `${BASE_WIDTH * scale}px`;
+      viewport.style.height = `${BASE_HEIGHT * scale}px`;
       canvas.style.transform = `scale(${scale})`;
     }
 
     function updateTokyoDate() {
       const now = new Date();
       const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: "Asia/Tokyo",
-        weekday: "short",
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
+        timeZone:"Asia/Tokyo",
+        weekday:"short",
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
       }).formatToParts(now);
       const pick = type => parts.find(part => part.type === type)?.value || "";
       tokyoDate.textContent = `TOKYO · ${pick("weekday").toUpperCase()} ${pick("day")} ${pick("month").toUpperCase()} ${pick("year")}`;
@@ -858,11 +879,11 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
       swipe.classList.remove("play");
       void swipe.offsetWidth;
       swipe.classList.add("play");
-      window.setTimeout(callback, 255);
+      window.setTimeout(callback,255);
       window.setTimeout(() => {
         swipe.classList.remove("play");
         transitioning = false;
-      }, 580);
+      },580);
     }
 
     function switchCharacter(src, alt) {
@@ -871,18 +892,18 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
         character.src = src;
         character.alt = alt;
         character.classList.remove("switching");
-      }, 90);
+      },90);
     }
 
     function renderLinks() {
       externalLinks.forEach(item => {
         const link = document.createElement("a");
-        link.className = "site-link external-action";
+        link.className = "site-link";
         link.href = item.href;
         link.target = "_blank";
         link.rel = "noreferrer";
         link.dataset.label = item.label;
-        link.setAttribute("aria-label", item.label);
+        link.setAttribute("aria-label",item.label);
         link.innerHTML = `<span class="glyph">${item.glyph}</span>`;
         linkStack.appendChild(link);
       });
@@ -890,7 +911,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
 
     function renderQuestions() {
       questions.innerHTML = "";
-      dialogue.forEach((item, index) => {
+      dialogue.forEach((item,index) => {
         const button = document.createElement("button");
         button.className = "question-btn";
         button.type = "button";
@@ -899,15 +920,15 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
           <span class="q-label">${item.question}</span>
           <span class="q-icon">${["⌕","◆","↗","★"][index]}</span>
         `;
-        button.addEventListener("click", () => selectQuestion(index));
+        button.addEventListener("click",() => selectQuestion(index));
         questions.appendChild(button);
       });
       updateQuestionHighlight();
     }
 
     function updateQuestionHighlight() {
-      [...questions.children].forEach((button, index) => {
-        button.classList.toggle("active", index === activeIndex);
+      [...questions.children].forEach((button,index) => {
+        button.classList.toggle("active",index === activeIndex);
       });
     }
 
@@ -916,7 +937,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
         activeIndex = index;
         activePage = 0;
         updateQuestionHighlight();
-        switchCharacter(dialogue[index].gif, `Ryu reaction for: ${dialogue[index].question}`);
+        switchCharacter(dialogue[index].gif,`Ryu reaction for: ${dialogue[index].question}`);
         updateDialogue();
       });
     }
@@ -926,8 +947,9 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
         dialogueText.textContent = "HEY — WELCOME TO MY DIALOGUE SYSTEM.\nPICK A QUESTION BELOW TO GET STARTED.";
         dialogueQuestion.textContent = "Choose a response.";
         pageCount.textContent = "";
-        nextButton.textContent = "▼";
-        nextButton.setAttribute("aria-label", "Choose a question below");
+        nextButton.textContent = "MORE ▼";
+        nextButton.disabled = true;
+        nextButton.setAttribute("aria-label","Choose a question below");
         return;
       }
 
@@ -935,66 +957,51 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
       dialogueText.textContent = item.pages[activePage];
       dialogueQuestion.textContent = item.question;
       pageCount.textContent = item.pages.length > 1 ? `${activePage + 1}/${item.pages.length}` : "";
+      nextButton.disabled = false;
 
       if (activePage < item.pages.length - 1) {
-        nextButton.textContent = "▼";
-        nextButton.setAttribute("aria-label", "Next dialogue page");
+        nextButton.textContent = "MORE ▼";
+        nextButton.setAttribute("aria-label","More dialogue");
       } else {
-        nextButton.textContent = "↺";
-        nextButton.setAttribute("aria-label", "Return to idle dialogue");
+        nextButton.textContent = "BACK ↺";
+        nextButton.setAttribute("aria-label","Return to idle dialogue");
       }
     }
 
-    function resetDialogue(withSwipe = true) {
-      const reset = () => {
-        activeIndex = null;
-        activePage = 0;
-        updateQuestionHighlight();
-        switchCharacter(idleGif, "Ryu character idle animation");
-        updateDialogue();
-      };
-      if (withSwipe) runSwipe(reset); else reset();
+    function resetDialogue() {
+      activeIndex = null;
+      activePage = 0;
+      updateQuestionHighlight();
+      switchCharacter(idleGif,"Ryu character idle animation");
+      updateDialogue();
     }
 
-    nextButton.addEventListener("click", () => {
+    nextButton.addEventListener("click",() => {
       if (activeIndex === null) return;
       const item = dialogue[activeIndex];
+
       if (activePage < item.pages.length - 1) {
-        runSwipe(() => {
-          activePage += 1;
-          updateDialogue();
-        });
+        activePage += 1;
+        updateDialogue();
       } else {
-        resetDialogue(true);
+        resetDialogue();
       }
     });
 
-    resetButton.addEventListener("click", () => resetDialogue(true));
+    resetButton.addEventListener("click",resetDialogue);
 
-    document.addEventListener("click", event => {
-      const link = event.target.closest(".external-action");
-      if (!link) return;
-      event.preventDefault();
-      const href = link.href;
-      const popup = window.open("about:blank", "_blank");
-      runSwipe(() => {
-        if (popup) popup.location.href = href;
-        else window.location.href = href;
-      });
-    });
-
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && activeIndex !== null && !transitioning) resetDialogue(true);
+    document.addEventListener("keydown",event => {
+      if (event.key === "Escape" && activeIndex !== null && !transitioning) resetDialogue();
       if ((event.key === "Enter" || event.key === "ArrowRight") && activeIndex !== null && !transitioning) nextButton.click();
     });
 
-    window.addEventListener("resize", fitCanvas);
+    window.addEventListener("resize",fitCanvas);
     renderLinks();
     renderQuestions();
     updateTokyoDate();
     updateDialogue();
     fitCanvas();
-    window.setInterval(updateTokyoDate, 60_000);
+    window.setInterval(updateTokyoDate,60_000);
   </script>
 </body>
 </html>
