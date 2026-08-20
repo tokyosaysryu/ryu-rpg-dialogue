@@ -1,16 +1,19 @@
 # RPG Dialogue Portfolio
 
-A tiny, dependency-free RPG-style interactive dialogue page.
+A GitHub Pages-ready interactive RPG dialogue interface inspired by a retro pixel-game UI.
 
-## Features
+## Current layout
 
-- Character GIF at the top
-- RPG dialogue UI at the bottom
-- Clickable question choices
-- Different reaction GIF for each answer
-- Returns to the idle GIF when you go back to the question list
-- Responsive on desktop and mobile
-- Works directly on GitHub Pages
+- Logical canvas: **1420 × 610 px**
+- Automatically scales down to fit smaller browser windows while preserving the 1420 × 610 composition
+- Google Font: **Pixelify Sans**
+- Dynamic Tokyo date header using the `Asia/Tokyo` timezone
+- Pixel-style left navigation rail with external links
+- Swappable background layer behind the character
+- Character reaction GIF switches per question
+- Swipe transition on dialogue/navigation interactions
+- Paginated answers with a next/reset control
+- Four interview questions fixed in the bottom response section
 
 ## Files
 
@@ -18,27 +21,55 @@ A tiny, dependency-free RPG-style interactive dialogue page.
 ryu-rpg-dialogue/
 ├─ index.html
 └─ assets/
+   ├─ background.gif
    ├─ idle.gif
    ├─ reaction-awesome.gif
    ├─ reaction-make.gif
-   └─ reaction-tokyo.gif
+   ├─ reaction-tokyo.gif
+   └─ reaction-about.gif
 ```
 
-## Replace the character GIFs
+## Replace the background
 
-Keep the same filenames, or edit the `gif` paths inside `index.html`.
+Replace `assets/background.gif` with your own GIF using the same filename.
 
-Recommended GIF ratio: **16:9** or a transparent character centered in a 16:9 canvas.
+For a PNG, upload something such as `assets/background.png`, then change this line in `index.html`:
 
-## Publish with GitHub Pages
+```html
+<img class="scene-bg" src="assets/background.gif" ... />
+```
 
-1. Open **Settings → Pages**.
-2. Under **Build and deployment**, choose **Deploy from a branch**.
-3. Select `main` and `/ (root)`, then save.
-4. The site will appear at:
+to:
 
-   `https://tokyosaysryu.github.io/ryu-rpg-dialogue/`
+```html
+<img class="scene-bg" src="assets/background.png" ... />
+```
 
-## Edit the questions
+## Replace character reactions
 
-Inside `index.html`, find the `dialogue` array and edit the question, answer, GIF path, and status label for each item.
+Keep the existing GIF filenames or edit each `gif` path in the `dialogue` array inside `index.html`.
+
+## External links
+
+Edit the `externalLinks` array near the bottom of `index.html`:
+
+```js
+const externalLinks = [
+  { label: "Portfolio", glyph: "WEB", href: "https://example.com" }
+];
+```
+
+## Questions and answers
+
+Edit the `dialogue` array. Each answer is stored as a `pages` array. Add another string when you want the **Next** button to continue the answer on a new page.
+
+## GitHub Pages
+
+Publish from:
+
+- Branch: `main`
+- Folder: `/ (root)`
+
+Live URL:
+
+`https://tokyosaysryu.github.io/ryu-rpg-dialogue/`
