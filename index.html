@@ -11,7 +11,6 @@
   <style>
     :root {
       --ink:#2b2030;
-      --ink-2:#3a2b43;
       --purple:#58416c;
       --purple-hi:#7b5c96;
       --purple-low:#44334f;
@@ -19,7 +18,6 @@
       --yellow-hi:#ffe58b;
       --yellow-low:#c58d45;
       --sand:#c99369;
-      --sand-hi:#dfb38a;
       --cream:#ebd7af;
       --cream-hi:#f8e9c9;
       --teal:#3ec1ae;
@@ -58,6 +56,7 @@
     .viewport {
       position:relative;
       flex:0 0 auto;
+      overflow:visible;
     }
 
     .canvas {
@@ -65,7 +64,7 @@
       left:0;
       top:0;
       width:1420px;
-      height:700px;
+      height:800px;
       overflow:hidden;
       background:var(--ink);
       border:4px solid #17111b;
@@ -96,7 +95,7 @@
       position:relative;
       z-index:3;
       height:68px;
-      padding:0 30px 0 38px;
+      padding:0 34px 0 38px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -109,7 +108,6 @@
     .tokyo-clock {
       display:flex;
       align-items:center;
-      gap:18px;
       font-weight:700;
       letter-spacing:2px;
       white-space:nowrap;
@@ -118,45 +116,31 @@
     .brand { font-size:31px; }
     .tokyo-clock { font-size:28px; }
 
-    .signal {
-      display:grid;
-      grid-template-columns:repeat(3,11px);
-      gap:4px;
-      align-items:end;
-      width:41px;
-      height:28px;
+    .global-tooltip {
+      position:absolute;
+      top:12px;
+      left:50%;
+      z-index:200;
+      transform:translateX(-50%);
+      min-width:140px;
+      padding:8px 14px;
+      display:none;
+      justify-content:center;
+      color:var(--text-light);
+      background:var(--ink);
+      border:3px solid var(--yellow);
+      box-shadow:4px 4px 0 #120d16;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:1px;
+      pointer-events:none;
+      white-space:nowrap;
     }
 
-    .signal i {
-      display:block;
-      width:11px;
-      background:var(--pink);
-      box-shadow:3px -3px 0 #2b2030;
-    }
-
-    .signal i:nth-child(1) { height:14px; }
-    .signal i:nth-child(2) { height:21px; background:#ee6a69; }
-    .signal i:nth-child(3) { height:27px; background:#50b99f; }
-
-    .tiny-face {
-      width:32px;
-      height:32px;
-      display:grid;
-      place-items:center;
-      color:var(--ink);
-      background:var(--cream);
-      border:3px solid #fff0cf;
-      box-shadow:3px 3px 0 #7d5c66;
-      font-size:20px;
-    }
-
-    .sound-icon {
-      color:var(--green);
-      font-size:34px;
-    }
+    .global-tooltip.show { display:flex; }
 
     .workspace {
-      height:632px;
+      height:732px;
       padding:10px;
       display:grid;
       grid-template-columns:118px 1260px;
@@ -166,14 +150,15 @@
 
     .sidebar {
       position:relative;
-      height:612px;
-      padding:72px 12px 48px;
+      height:712px;
+      padding:78px 12px 54px;
       background:#33273b;
       border:4px solid #201825;
       box-shadow:
         inset 0 0 0 4px #665276,
         inset 0 0 0 8px #463650,
         6px 6px 0 #241a2a;
+      overflow:visible;
     }
 
     .rail-cap {
@@ -195,14 +180,13 @@
 
     .link-stack {
       display:grid;
-      gap:12px;
+      gap:16px;
       justify-items:center;
     }
 
     .site-link {
-      position:relative;
       width:82px;
-      height:72px;
+      height:78px;
       display:grid;
       place-items:center;
       text-decoration:none;
@@ -229,34 +213,14 @@
     .site-link:active { transform:translate(2px,2px); }
 
     .site-link .glyph {
-      font-size:27px;
+      font-size:30px;
       font-weight:700;
       line-height:1;
     }
 
-    .site-link::after {
-      content:attr(data-label);
-      position:absolute;
-      left:calc(100% + 12px);
-      top:50%;
-      transform:translateY(-50%);
-      z-index:15;
-      display:none;
-      padding:7px 10px;
-      background:var(--ink);
-      border:3px solid var(--yellow);
-      color:var(--text-light);
-      font-size:15px;
-      white-space:nowrap;
-      box-shadow:4px 4px 0 #120d16;
-    }
-
-    .site-link:hover::after,
-    .site-link:focus-visible::after { display:block; }
-
     .main-area {
       position:relative;
-      height:612px;
+      height:712px;
     }
 
     .tabs {
@@ -267,32 +231,24 @@
       height:65px;
       display:flex;
       align-items:flex-end;
-      gap:6px;
     }
 
     .tab {
-      height:54px;
-      min-width:215px;
-      padding:0 26px;
+      height:65px;
+      min-width:235px;
+      padding:0 30px;
       display:flex;
       align-items:center;
       justify-content:center;
       gap:12px;
-      color:#b39cc9;
-      background:#58436d;
-      border:4px solid #231728;
-      border-bottom:0;
-      box-shadow:inset 0 0 0 4px #72598a;
-      font-size:23px;
-      font-weight:700;
-      letter-spacing:1px;
-    }
-
-    .tab.active {
-      height:65px;
       color:var(--text-dark);
       background:var(--yellow);
+      border:4px solid #231728;
+      border-bottom:0;
       box-shadow:inset 0 0 0 4px var(--yellow-hi);
+      font-size:24px;
+      font-weight:700;
+      letter-spacing:1px;
     }
 
     .window-actions {
@@ -300,8 +256,6 @@
       right:5px;
       top:0;
       z-index:6;
-      display:flex;
-      gap:8px;
     }
 
     .window-btn {
@@ -326,8 +280,8 @@
       left:0;
       top:60px;
       width:1260px;
-      height:552px;
-      padding:24px 24px 20px;
+      height:652px;
+      padding:24px 24px 22px;
       background:var(--yellow);
       border:5px solid #241a2b;
       box-shadow:
@@ -350,7 +304,7 @@
     .panel-bolt.b { right:17px; top:18px; }
 
     .top-content {
-      height:270px;
+      height:285px;
       display:grid;
       grid-template-columns:365px 1fr;
       gap:28px;
@@ -358,9 +312,9 @@
     }
 
     .portrait-wrap {
-      height:260px;
+      height:275px;
       display:grid;
-      grid-template-rows:212px 40px;
+      grid-template-rows:225px 42px;
       gap:8px;
     }
 
@@ -432,7 +386,7 @@
     .meter-track i:nth-child(4) { background:var(--teal); }
 
     .dialogue-side {
-      height:260px;
+      height:275px;
       display:grid;
       grid-template-rows:62px 1fr;
       gap:10px;
@@ -491,7 +445,7 @@
 
     .dialogue-box {
       position:relative;
-      padding:18px 104px 18px 28px;
+      padding:18px 118px 18px 28px;
       color:var(--text-light);
       background:#302537;
       border:5px solid #241a2b;
@@ -532,7 +486,7 @@
     }
 
     .next-btn {
-      min-width:76px;
+      min-width:78px;
       height:42px;
       padding:0 10px;
       display:grid;
@@ -556,21 +510,26 @@
     }
 
     .response-section {
-      height:224px;
-      margin:12px 18px 0;
+      position:relative;
+      height:305px;
+      margin:18px 18px 0;
+      padding:18px 16px;
       border-top:4px solid #b97859;
       border-left:4px solid #b97859;
       border-right:4px solid #d8a16e;
       border-bottom:4px solid #d8a16e;
       background:var(--sand);
-      padding:0 14px 14px;
       box-shadow:inset 0 0 0 4px #d9a679;
+      overflow:visible;
     }
 
     .response-title {
-      width:310px;
-      height:25px;
-      margin:-14px auto 5px;
+      position:absolute;
+      top:-15px;
+      left:50%;
+      transform:translateX(-50%);
+      width:320px;
+      height:27px;
       padding:0 18px;
       display:flex;
       align-items:center;
@@ -592,17 +551,19 @@
     }
 
     .questions {
+      height:100%;
       display:grid;
-      gap:7px;
+      grid-template-rows:repeat(4,1fr);
+      gap:10px;
     }
 
     .question-btn {
       width:100%;
-      height:45px;
+      min-height:55px;
       display:grid;
-      grid-template-columns:62px 1fr 54px;
+      grid-template-columns:68px 1fr 58px;
       align-items:center;
-      padding:0 9px 0 0;
+      padding:0 10px 0 0;
       border:3px solid #2a1d31;
       background:var(--cream);
       color:var(--text-dark);
@@ -632,7 +593,7 @@
       color:#fff4cf;
       background:var(--blue);
       border-right:3px solid #2a1d31;
-      font-size:25px;
+      font-size:28px;
       text-shadow:2px 2px 0 rgba(0,0,0,.28);
     }
 
@@ -641,8 +602,8 @@
     .question-btn:nth-child(4) .q-number { background:var(--pink); }
 
     .q-label {
-      padding:0 20px;
-      font-size:23px;
+      padding:0 22px;
+      font-size:28px;
       font-weight:700;
       line-height:1;
       overflow:hidden;
@@ -651,8 +612,8 @@
     }
 
     .q-icon {
-      width:42px;
-      height:30px;
+      width:46px;
+      height:34px;
       display:grid;
       place-items:center;
       justify-self:end;
@@ -660,7 +621,7 @@
       background:#352740;
       border:3px solid #211724;
       box-shadow:inset 0 0 0 2px #5a4668;
-      font-size:19px;
+      font-size:20px;
     }
 
     .swipe {
@@ -675,7 +636,7 @@
     }
 
     .swipe::before {
-      content:"FOR FUDGE SAKE";
+      content:"DIALOGUE.SYSTEM";
       position:absolute;
       left:50%;
       top:50%;
@@ -705,14 +666,11 @@
 <body>
   <div class="viewport" id="viewport">
     <main class="canvas" id="canvas" aria-label="Interactive pixel dialogue system">
+      <div class="global-tooltip" id="globalTooltip" role="status"></div>
+
       <header class="topbar">
-        <div class="brand">
-          <span class="signal" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span class="tiny-face" aria-hidden="true">■</span>
-          <span>FOR FUDGE SAKE</span>
-        </div>
+        <div class="brand">DIALOGUE.SYSTEM</div>
         <div class="tokyo-clock">
-          <span class="sound-icon" aria-hidden="true">◖))</span>
           <span id="tokyoDate">TOKYO · THU 20 AUG 2026</span>
         </div>
       </header>
@@ -725,14 +683,11 @@
         </aside>
 
         <section class="main-area">
-          <div class="tabs" aria-label="Dialogue interface tabs">
-            <div class="tab active">▣ DIALOGUE</div>
-            <div class="tab">⚑ PROFILE</div>
-            <div class="tab">◇ SYSTEM</div>
+          <div class="tabs" aria-label="Dialogue interface tab">
+            <div class="tab">▣ DIALOGUE</div>
           </div>
 
           <div class="window-actions">
-            <a class="window-btn" href="https://github.com/tokyosaysryu/ryu-rpg-dialogue" target="_blank" rel="noreferrer" aria-label="Open GitHub repository">☰</a>
             <button class="window-btn" id="resetButton" type="button" aria-label="Reset dialogue">×</button>
           </div>
 
@@ -767,7 +722,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
                   <span class="dialogue-question" id="dialogueQuestion">Choose a response.</span>
                   <div class="dialogue-nav">
                     <span class="page-count" id="pageCount"></span>
-                    <button class="next-btn" id="nextButton" type="button" aria-label="More dialogue" disabled>MORE ▼</button>
+                    <button class="next-btn" id="nextButton" type="button" aria-label="More dialogue">MORE ▼</button>
                   </div>
                 </div>
               </div>
@@ -787,14 +742,11 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
 
   <script>
     const BASE_WIDTH = 1420;
-    const BASE_HEIGHT = 700;
+    const BASE_HEIGHT = 800;
 
     const externalLinks = [
       { label:"Portfolio", glyph:"WEB", href:"https://www.ryutanaka.com/" },
-      { label:"GitHub", glyph:"GH", href:"https://github.com/tokyosaysryu" },
-      { label:"LinkedIn", glyph:"IN", href:"https://www.linkedin.com/" },
-      { label:"Behance", glyph:"BE", href:"https://www.behance.net/" },
-      { label:"Vimeo", glyph:"▶", href:"https://vimeo.com/" }
+      { label:"LinkedIn", glyph:"IN", href:"https://www.linkedin.com/" }
     ];
 
     const dialogue = [
@@ -836,6 +788,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
     const viewport = document.getElementById("viewport");
     const canvas = document.getElementById("canvas");
     const linkStack = document.getElementById("linkStack");
+    const globalTooltip = document.getElementById("globalTooltip");
     const questions = document.getElementById("questions");
     const dialogueText = document.getElementById("dialogueText");
     const dialogueQuestion = document.getElementById("dialogueQuestion");
@@ -895,6 +848,15 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
       },90);
     }
 
+    function showTooltip(label) {
+      globalTooltip.textContent = label;
+      globalTooltip.classList.add("show");
+    }
+
+    function hideTooltip() {
+      globalTooltip.classList.remove("show");
+    }
+
     function renderLinks() {
       externalLinks.forEach(item => {
         const link = document.createElement("a");
@@ -902,9 +864,12 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
         link.href = item.href;
         link.target = "_blank";
         link.rel = "noreferrer";
-        link.dataset.label = item.label;
         link.setAttribute("aria-label",item.label);
         link.innerHTML = `<span class="glyph">${item.glyph}</span>`;
+        link.addEventListener("mouseenter",() => showTooltip(item.label));
+        link.addEventListener("mouseleave",hideTooltip);
+        link.addEventListener("focus",() => showTooltip(item.label));
+        link.addEventListener("blur",hideTooltip);
         linkStack.appendChild(link);
       });
     }
