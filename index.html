@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive RPG-style portfolio dialogue." />
+  <title>Ryu — RPG Dialogue</title>
+  <style>
+    :root {
+      --bg: #08090c;
+      --panel: #111319;
+      --panel-2: #171a21;
+      --text: #f5f5f2;
+      --muted: #a7abb4;
+      --line: #353944;
+      --accent: #ff7a2d;
+      --shadow: rgba(0,0,0,.4);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    button { font: inherit; }
+
+    .game {
+      width: min(900px, 100%);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 24px 80px var(--shadow);
+      overflow: hidden;
+    }
+
+    .stage {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      min-height: 260px;
+      background: #0a0b0f;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 36px 36px;
+      pointer-events: none;
+    }
+
+    .character {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: auto;
+      transition: opacity .14s ease, transform .18s ease;
+    }
+
+    .character.switching { opacity: .25; transform: scale(.985); }
+
+    .status {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 2;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      background: rgba(8,9,12,.76);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .dialogue {
+      border-top: 1px solid var(--line);
+      padding: clamp(18px, 3vw, 30px);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .speaker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .speaker::before { content: "◆"; font-size: 10px; }
+
+    .dialogue-text {
+      margin: 0;
+      font-size: clamp(20px, 3vw, 30px);
+      line-height: 1.3;
+      letter-spacing: -.02em;
+      max-width: 760px;
+    }
+
+    .hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice, .back {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 15px 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease, transform .15s ease;
+    }
+
+    .choice {
+      display: grid;
+      grid-template-columns: 28px 1fr 18px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .choice .num { color: var(--muted); font-size: 12px; }
+    .choice .arrow { color: var(--muted); transition: transform .15s ease, color .15s ease; }
+
+    .choice:hover, .choice:focus-visible, .back:hover, .back:focus-visible {
+      background: #1d2028;
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .choice:hover .arrow, .choice:focus-visible .arrow {
+      transform: translateX(3px);
+      color: var(--accent);
+    }
+
+    .choice:active, .back:active { transform: scale(.995); }
+
+    .back {
+      max-width: 220px;
+      text-align: center;
+      background: transparent;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 560px) {
+      body { padding: 0; }
+      .game { border-left: 0; border-right: 0; }
+      .stage { aspect-ratio: 4 / 3; }
+      .dialogue { min-height: 330px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="game" aria-label="Interactive RPG dialogue">
+    <section class="stage" aria-label="Character animation">
+      <div class="status" id="status">Idle</div>
+      <img
+        id="character"
+        class="character"
+        src="assets/idle.gif"
+        alt="Animated character in an idle pose"
+      />
+    </section>
+
+    <section class="dialogue">
+      <div>
+        <div class="speaker">Ryu</div>
+        <p class="dialogue-text" id="dialogueText" aria-live="polite">
+          What would you like to know?
+        </p>
+        <p class="hint" id="hint">Choose a question.</p>
+      </div>
+
+      <div class="choices" id="choices" aria-label="Dialogue choices"></div>
+      <button class="back hidden" id="backButton" type="button">← Back to questions</button>
+    </section>
+  </main>
+
+  <script>
+    const dialogue = [
+      {
+        question: "Why do you want to work with us?",
+        answer: "I think it's awesome",
+        gif: "assets/reaction-awesome.gif",
+        status: "Excited"
+      },
+      {
+        question: "What do you like to do?",
+        answer: "I like to make cool things.",
+        gif: "assets/reaction-make.gif",
+        status: "Making things"
+      },
+      {
+        question: "Where do you live?",
+        answer: "I'm based in Tokyo, Japan.",
+        gif: "assets/reaction-tokyo.gif",
+        status: "Tokyo"
+      }
+    ];
+
+    const idleGif = "assets/idle.gif";
+    const character = document.getElementById("character");
+    const status = document.getElementById("status");
+    const dialogueText = document.getElementById("dialogueText");
+    const hint = document.getElementById("hint");
+    const choices = document.getElementById("choices");
+    const backButton = document.getElementById("backButton");
+
+    function switchGif(src, alt, label) {
+      character.classList.add("switching");
+      window.setTimeout(() => {
+        character.src = src;
+        character.alt = alt;
+        status.textContent = label;
+        character.classList.remove("switching");
+      }, 120);
+    }
+
+    function renderQuestions() {
+      dialogueText.textContent = "What would you like to know?";
+      hint.textContent = "Choose a question.";
+      choices.innerHTML = "";
+      choices.classList.remove("hidden");
+      backButton.classList.add("hidden");
+      switchGif(idleGif, "Animated character in an idle pose", "Idle");
+
+      dialogue.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice";
+        button.innerHTML = `
+          <span class="num">0${index + 1}</span>
+          <span>${item.question}</span>
+          <span class="arrow">→</span>
+        `;
+        button.addEventListener("click", () => showAnswer(item));
+        choices.appendChild(button);
+      });
+    }
+
+    function showAnswer(item) {
+      dialogueText.textContent = item.answer;
+      hint.textContent = item.question;
+      choices.classList.add("hidden");
+      backButton.classList.remove("hidden");
+      switchGif(item.gif, `Animated character reaction: ${item.status}`, item.status);
+      backButton.focus();
+    }
+
+    backButton.addEventListener("click", renderQuestions);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !backButton.classList.contains("hidden")) {
+        renderQuestions();
+      }
+    });
+
+    renderQuestions();
+  </script>
+</body>
+</html>
