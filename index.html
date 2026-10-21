@@ -201,6 +201,10 @@
       justify-items:center;
     }
 
+    .mobile-link-dock {
+      display:none;
+    }
+
     .site-link {
       width:82px;
       height:78px;
@@ -787,46 +791,36 @@
       }
 
       .sidebar {
-        width:100%;
-        height:52px;
-        flex:0 0 52px;
-        padding:5px 8px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        border-width:3px;
-        border-radius:8px;
-        box-shadow:
-          inset 0 0 0 3px #655176,
-          inset 0 0 0 6px #45354f,
-          4px 4px 0 #211825;
-      }
-
-      .rail-cap {
         display:none;
       }
 
-      .link-stack {
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:10px;
+      .mobile-link-dock {
+        display:grid;
+        grid-template-rows:repeat(2,1fr);
+        gap:8px;
+        min-width:0;
+        min-height:0;
+        align-self:stretch;
       }
 
-      .site-link {
-        width:76px;
-        height:38px;
+      .mobile-link-dock .site-link {
+        width:100%;
+        height:100%;
+        min-height:0;
         border-width:3px;
         border-radius:6px;
         box-shadow:inset 0 0 0 3px #78638d,4px 4px 0 #211724;
       }
 
-      .site-link:first-child {
+      .mobile-link-dock .site-link:first-child {
         box-shadow:inset 0 0 0 3px var(--yellow-hi),4px 4px 0 #211724;
       }
 
-      .site-link .glyph {
-        font-size:18px;
+      .mobile-link-dock .site-link .glyph {
+        font-size:16px;
+        writing-mode:vertical-rl;
+        transform:rotate(180deg);
+        letter-spacing:1px;
       }
 
       .main-area {
@@ -892,25 +886,36 @@
       .top-content {
         min-height:0;
         display:grid;
-        grid-template-columns:1fr;
-        grid-template-rows:minmax(105px,36%) minmax(0,1fr);
-        gap:9px;
+        grid-template-columns:56px minmax(0,1fr);
+        grid-template-rows:auto minmax(0,1fr);
+        column-gap:9px;
+        row-gap:9px;
       }
 
       .portrait-wrap {
+        grid-column:2;
+        grid-row:1;
         width:100%;
         height:auto;
         min-height:0;
         display:grid;
-        grid-template-rows:minmax(78px,1fr) 26px;
+        grid-template-rows:auto 26px;
         gap:5px;
       }
 
       .portrait-frame {
+        width:100%;
+        aspect-ratio:365 / 235;
+        height:auto;
         min-height:0;
         border-width:4px;
         border-radius:7px;
         box-shadow:inset 0 0 0 4px #6b557b,4px 4px 0 #9f684b;
+      }
+
+      .mobile-link-dock {
+        grid-column:1;
+        grid-row:1;
       }
 
       .character {
@@ -942,6 +947,8 @@
       }
 
       .dialogue-side {
+        grid-column:1 / -1;
+        grid-row:2;
         width:100%;
         height:auto;
         min-height:0;
@@ -1092,13 +1099,12 @@
         gap:6px;
       }
 
-      .sidebar {
-        height:46px;
-        flex-basis:46px;
+      .mobile-link-dock {
+        gap:6px;
       }
 
-      .site-link {
-        height:34px;
+      .mobile-link-dock .site-link .glyph {
+        font-size:14px;
       }
 
       .panel {
@@ -1108,8 +1114,10 @@
       }
 
       .top-content {
-        grid-template-rows:minmax(92px,34%) minmax(0,1fr);
-        gap:7px;
+        grid-template-columns:52px minmax(0,1fr);
+        grid-template-rows:auto minmax(0,1fr);
+        column-gap:7px;
+        row-gap:7px;
       }
 
       .q-label {
@@ -1162,6 +1170,8 @@
             <span class="panel-bolt b" aria-hidden="true"></span>
 
             <div class="top-content">
+              <nav class="mobile-link-dock" id="mobileLinkDock" aria-label="Mobile external links"></nav>
+
               <div class="portrait-wrap">
                 <div class="portrait-frame">
                   <img class="scene-bg" src="assets/background.gif" alt="" aria-hidden="true" />
@@ -1253,6 +1263,7 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
     const viewport = document.getElementById("viewport");
     const canvas = document.getElementById("canvas");
     const linkStack = document.getElementById("linkStack");
+    const mobileLinkDock = document.getElementById("mobileLinkDock");
     const globalTooltip = document.getElementById("globalTooltip");
     const questions = document.getElementById("questions");
     const dialogueText = document.getElementById("dialogueText");
@@ -1333,22 +1344,30 @@ PICK A QUESTION BELOW TO GET STARTED.</p>
       globalTooltip.classList.remove("show");
     }
 
+    function createExternalLink(item) {
+      const link = document.createElement("a");
+      link.className = "site-link";
+      link.href = item.href;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.setAttribute("aria-label",item.label);
+      link.innerHTML = `<span class="glyph">${item.glyph}</span>`;
+
+      link.addEventListener("mouseenter",() => showTooltip(item.label));
+      link.addEventListener("mouseleave",hideTooltip);
+      link.addEventListener("focus",() => showTooltip(item.label));
+      link.addEventListener("blur",hideTooltip);
+
+      return link;
+    }
+
     function renderLinks() {
+      linkStack.innerHTML = "";
+      mobileLinkDock.innerHTML = "";
+
       externalLinks.forEach(item => {
-        const link = document.createElement("a");
-        link.className = "site-link";
-        link.href = item.href;
-        link.target = "_blank";
-        link.rel = "noreferrer";
-        link.setAttribute("aria-label",item.label);
-        link.innerHTML = `<span class="glyph">${item.glyph}</span>`;
-
-        link.addEventListener("mouseenter",() => showTooltip(item.label));
-        link.addEventListener("mouseleave",hideTooltip);
-        link.addEventListener("focus",() => showTooltip(item.label));
-        link.addEventListener("blur",hideTooltip);
-
-        linkStack.appendChild(link);
+        linkStack.appendChild(createExternalLink(item));
+        mobileLinkDock.appendChild(createExternalLink(item));
       });
     }
 
