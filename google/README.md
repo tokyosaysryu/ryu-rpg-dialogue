@@ -1,10 +1,10 @@
-# ryu-rpg-dialogue-google
+# google
 
-A Google-specific version of Ryu Tanaka's interactive pixel-art dialogue portfolio.
+Google-specific version of Ryu Tanaka's interactive pixel-art dialogue portfolio.
 
 ## Live URL
 
-https://tokyosaysryu.github.io/ryu-rpg-dialogue/ryu-rpg-dialogue-google/
+https://tokyosaysryu.github.io/ryu-rpg-dialogue/google/
 
 ## Notes
 
