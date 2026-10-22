@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ryu's interactive pixel RPG dialogue system." />
+  <title>Ryu — Google Creative Dialogue</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink:#2a2030;
+      --ink-deep:#17111b;
+      --purple:#59446c;
+      --purple-hi:#80659a;
+      --purple-low:#42334d;
+      --yellow:#f0c45b;
+      --yellow-hi:#ffe58b;
+      --yellow-low:#be8444;
+      --cream:#ead4aa;
+      --cream-hi:#fff0cf;
+      --teal:#39bfa9;
+      --green:#62c46c;
+      --pink:#e75b82;
+      --blue:#48a9c6;
+      --lilac:#9475c8;
+      --text-dark:#392c42;
+      --text-light:#fff0d3;
+      --px:4px;
+      --corner:10px;
+    }
+
+    * { box-sizing:border-box; }
+
+    html, body {
+      margin:0;
+      width:100%;
+      min-width:100%;
+      min-height:100%;
+      background:#1d1621;
+    }
+
+    body {
+      min-height:100dvh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      overflow:auto;
+      font-family:"Pixelify Sans", monospace;
+      color:var(--text-light);
+      image-rendering:pixelated;
+      text-rendering:geometricPrecision;
+    }
+
+    button, a { font:inherit; }
+
+    .viewport {
+      position:relative;
+      flex:0 0 auto;
+      overflow:visible;
+    }
+
+    .canvas {
+      position:absolute;
+      left:0;
+      top:0;
+      width:1420px;
+      height:800px;
+      overflow:hidden;
+      background:var(--ink);
+      border:var(--px) solid var(--ink-deep);
+      border-radius:12px;
+      box-shadow:
+        inset 0 0 0 4px #4c3a54,
+        inset 0 0 0 8px #211926,
+        12px 12px 0 #100c13;
+      transform-origin:top left;
+    }
+
+    .canvas::after {
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:50;
+      pointer-events:none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.025) 0,
+          rgba(255,255,255,.025) 2px,
+          transparent 2px,
+          transparent 6px
+        );
+      mix-blend-mode:soft-light;
+    }
+
+    .topbar {
+      position:relative;
+      z-index:3;
+      height:68px;
+      padding:0 34px 0 38px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#271d2c;
+      border-bottom:5px solid #120e16;
+      box-shadow:
+        inset 0 -4px 0 #4a3952,
+        inset 0 4px 0 #35273d;
+    }
+
+    .brand,
+    .tokyo-clock {
+      display:flex;
+      align-items:center;
+      font-weight:700;
+      letter-spacing:2px;
+      white-space:nowrap;
+      text-shadow:3px 3px 0 #120e16;
+    }
+
+    .brand { font-size:31px; }
+    .tokyo-clock { font-size:28px; }
+
+    .global-tooltip {
+      position:absolute;
+      top:12px;
+      left:50%;
+      z-index:200;
+      transform:translateX(-50%);
+      min-width:140px;
+      padding:8px 14px;
+      display:none;
+      justify-content:center;
+      color:var(--text-light);
+      background:var(--ink);
+      border:4px solid var(--yellow);
+      border-radius:8px;
+      box-shadow:6px 6px 0 #120d16;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:1px;
+      pointer-events:none;
+      white-space:nowrap;
+    }
+
+    .global-tooltip.show { display:flex; }
+
+    .workspace {
+      height:732px;
+      padding:10px;
+      display:grid;
+      grid-template-columns:118px 1260px;
+      gap:22px;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.035) 4px,transparent 4px) 0 0/16px 16px,
+        linear-gradient(rgba(255,255,255,.025) 4px,transparent 4px) 0 0/16px 16px,
+        #4e3e58;
+    }
+
+    .sidebar {
+      position:relative;
+      height:712px;
+      padding:78px 12px 54px;
+      background:#33273b;
+      border:4px solid #201825;
+      border-radius:10px;
+      box-shadow:
+        inset 0 0 0 4px #655176,
+        inset 0 0 0 8px #45354f,
+        8px 8px 0 #211825;
+      overflow:visible;
+    }
+
+    .rail-cap {
+      position:absolute;
+      left:10px;
+      right:10px;
+      height:45px;
+      display:grid;
+      place-items:center;
+      background:var(--purple-low);
+      color:#ad90c4;
+      border:4px solid #211725;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #6d5680,4px 4px 0 #1b151f;
+      font-size:24px;
+      text-shadow:2px 2px 0 #251b2b;
+    }
+
+    .rail-cap.top { top:10px; }
+    .rail-cap.bottom { bottom:10px; }
+
+    .link-stack {
+      display:grid;
+      gap:16px;
+      justify-items:center;
+    }
+
+    .mobile-link-dock {
+      display:none;
+    }
+
+    .site-link {
+      width:82px;
+      height:78px;
+      display:grid;
+      place-items:center;
+      text-decoration:none;
+      color:#cdbde2;
+      background:#59456c;
+      border:4px solid #211724;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #78638d,6px 6px 0 #211724;
+      transition:transform .06s steps(2,end),filter .06s steps(2,end);
+    }
+
+    .site-link:first-child {
+      color:var(--ink);
+      background:var(--yellow);
+      box-shadow:inset 0 0 0 4px var(--yellow-hi),6px 6px 0 #211724;
+    }
+
+    .site-link:hover,
+    .site-link:focus-visible {
+      outline:0;
+      filter:brightness(1.08);
+      transform:translate(-4px,-4px);
+    }
+
+    .site-link:active { transform:translate(4px,4px); }
+
+    .site-link .glyph {
+      font-size:30px;
+      font-weight:700;
+      line-height:1;
+      text-shadow:2px 2px 0 rgba(0,0,0,.2);
+    }
+
+    .main-area {
+      position:relative;
+      height:712px;
+    }
+
+    .tabs {
+      position:absolute;
+      top:0;
+      left:18px;
+      z-index:4;
+      height:65px;
+      display:flex;
+      align-items:flex-end;
+    }
+
+    .tab {
+      height:65px;
+      min-width:235px;
+      padding:0 30px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      color:var(--text-dark);
+      background:var(--yellow);
+      border:4px solid #231728;
+      border-bottom:0;
+      border-radius:10px 10px 0 0;
+      box-shadow:inset 0 0 0 4px var(--yellow-hi),6px 0 0 #211724;
+      font-size:24px;
+      font-weight:700;
+      letter-spacing:1px;
+      text-shadow:2px 2px 0 rgba(255,255,255,.22);
+    }
+
+    .window-actions {
+      position:absolute;
+      right:5px;
+      top:0;
+      z-index:6;
+    }
+
+    .window-btn {
+      width:78px;
+      height:62px;
+      display:grid;
+      place-items:center;
+      color:var(--cream);
+      background:#59456d;
+      border:4px solid #211724;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #765f89,5px 5px 0 #201724;
+      font-size:30px;
+      cursor:pointer;
+      transition:transform .06s steps(2,end),filter .06s steps(2,end);
+    }
+
+    .window-btn:hover,
+    .window-btn:focus-visible {
+      outline:0;
+      filter:brightness(1.12);
+      transform:translate(-3px,-3px);
+    }
+
+    .window-btn:active { transform:translate(3px,3px); }
+
+    .panel {
+      position:absolute;
+      left:0;
+      top:60px;
+      width:1260px;
+      height:652px;
+      padding:24px 42px;
+      display:grid;
+      grid-template-rows:285px 1fr;
+      gap:24px;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.08) 4px,transparent 4px) 0 0/24px 24px,
+        var(--yellow);
+      border:5px solid #241a2b;
+      border-radius:12px;
+      box-shadow:
+        inset 0 0 0 5px var(--yellow-hi),
+        inset 0 0 0 10px var(--yellow-low),
+        8px 8px 0 #2d2134;
+    }
+
+    .panel-bolt {
+      position:absolute;
+      width:23px;
+      height:23px;
+      border:3px solid #241a2b;
+      border-radius:5px;
+      background:#43354f;
+      box-shadow:inset 4px 4px 0 #675475;
+    }
+
+    .panel-bolt.a { left:17px; top:18px; }
+    .panel-bolt.b { right:17px; top:18px; }
+
+    .top-content {
+      min-height:0;
+      display:grid;
+      grid-template-columns:365px 1fr;
+      gap:28px;
+    }
+
+    .portrait-wrap {
+      height:285px;
+      display:grid;
+      grid-template-rows:235px 42px;
+      gap:8px;
+    }
+
+    .portrait-frame {
+      position:relative;
+      overflow:hidden;
+      background:#30263a;
+      border:5px solid #312238;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 5px #6b557b,6px 6px 0 #9f684b;
+    }
+
+    .portrait-frame::after {
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:3;
+      pointer-events:none;
+      box-shadow:inset 0 0 0 4px rgba(255,255,255,.06);
+    }
+
+    .scene-bg,
+    .character {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      image-rendering:pixelated;
+    }
+
+    .scene-bg {
+      z-index:0;
+      object-fit:cover;
+      background:#42364b;
+      opacity:.9;
+    }
+
+    .character {
+      z-index:1;
+      object-fit:contain;
+      transform:scale(1.32) translateY(7px);
+      transform-origin:center bottom;
+      transition:opacity .08s steps(2,end),transform .08s steps(2,end);
+    }
+
+    .character.switching { opacity:.2; transform:scale(1.27) translateY(7px); }
+
+    .meter {
+      display:grid;
+      grid-template-columns:70px 1fr;
+      gap:7px;
+    }
+
+    .mood-face {
+      display:grid;
+      place-items:center;
+      color:var(--text-dark);
+      background:#5b4470;
+      border:4px solid #2c2032;
+      border-radius:7px;
+      box-shadow:inset 0 0 0 4px #8a6da4,4px 4px 0 #38273e;
+      font-size:24px;
+    }
+
+    .meter-track {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:5px;
+      padding:7px;
+      background:#453450;
+      border:4px solid #2c2032;
+      border-radius:7px;
+      box-shadow:inset 0 0 0 3px #755987,4px 4px 0 #38273e;
+      overflow:hidden;
+    }
+
+    .meter-track i {
+      display:block;
+      border:2px solid rgba(43,32,48,.55);
+      border-radius:3px;
+      box-shadow:inset 0 4px 0 rgba(255,255,255,.12);
+    }
+
+    .meter-track i:nth-child(1) { background:var(--pink); }
+    .meter-track i:nth-child(2) { background:var(--yellow); }
+    .meter-track i:nth-child(3) { background:#56b67a; }
+    .meter-track i:nth-child(4) { background:var(--teal); }
+
+    .dialogue-side {
+      height:285px;
+      display:grid;
+      grid-template-rows:62px 1fr;
+      gap:10px;
+    }
+
+    .name-row {
+      display:grid;
+      grid-template-columns:1fr 194px;
+      gap:18px;
+    }
+
+    .nameplate {
+      display:flex;
+      align-items:center;
+      padding:0 26px;
+      color:var(--yellow-hi);
+      background:#58406c;
+      border:5px solid #2b1e32;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 5px #805e98,5px 5px 0 #9b684c;
+      font-size:32px;
+      letter-spacing:4px;
+      text-shadow:3px 3px 0 #2b1e32;
+    }
+
+    .badge-row {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      color:#9b5f54;
+    }
+
+    .shield {
+      width:56px;
+      height:58px;
+      display:grid;
+      place-items:center;
+      color:var(--text-dark);
+      background:var(--teal);
+      border:5px solid #302139;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #78dfc7,4px 4px 0 #9b684c;
+      font-size:19px;
+      font-weight:700;
+    }
+
+    .badge-bars {
+      display:grid;
+      grid-template-columns:repeat(5,6px);
+      gap:7px;
+      height:42px;
+      align-items:stretch;
+    }
+
+    .badge-bars i {
+      background:#a65f50;
+      border-radius:2px;
+      box-shadow:2px 0 0 #77433a;
+    }
+
+    .dialogue-box {
+      position:relative;
+      padding:18px 118px 18px 28px;
+      color:var(--text-light);
+      background:#302537;
+      border:5px solid #241a2b;
+      border-radius:8px;
+      box-shadow:inset 0 0 0 4px #44334c,5px 5px 0 #b27a4d;
+      overflow:hidden;
+    }
+
+    .dialogue-box::before {
+      content:"";
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:4px;
+      background:#5b4665;
+    }
+
+    .dialogue-text {
+      margin:0;
+      max-width:760px;
+      font-size:24px;
+      line-height:1.24;
+      letter-spacing:.4px;
+      white-space:pre-line;
+      text-shadow:2px 2px 0 #17111b;
+    }
+
+    .dialogue-question {
+      display:block;
+      margin-top:8px;
+      color:#c7a9d2;
+      font-size:15px;
+    }
+
+    .dialogue-nav {
+      position:absolute;
+      right:15px;
+      bottom:15px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .page-count {
+      color:#d5b9d9;
+      font-size:14px;
+      min-width:38px;
+      text-align:right;
+    }
+
+    .next-btn {
+      min-width:78px;
+      height:42px;
+      padding:0 10px;
+      display:grid;
+      place-items:center;
+      color:var(--text-dark);
+      background:var(--yellow);
+      border:4px solid #211724;
+      border-radius:7px;
+      box-shadow:inset 0 0 0 3px var(--yellow-hi),4px 4px 0 #1e1522;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:700;
+      transition:transform .05s steps(2,end),filter .05s steps(2,end);
+    }
+
+    .next-btn:hover,
+    .next-btn:focus-visible {
+      outline:0;
+      filter:brightness(1.08);
+      transform:translate(-2px,-2px);
+    }
+
+    .next-btn:active { transform:translate(2px,2px); }
+
+    .next-btn:disabled {
+      opacity:.45;
+      cursor:default;
+      filter:none;
+      transform:none;
+    }
+
+    /* Questions now sit directly inside the yellow main panel. */
+    .questions {
+      min-height:0;
+      display:grid;
+      grid-template-rows:repeat(4,1fr);
+      gap:10px;
+    }
+
+    .question-btn {
+      width:100%;
+      min-height:0;
+      display:grid;
+      grid-template-columns:68px 1fr 58px;
+      align-items:center;
+      padding:0 10px 0 0;
+      border:4px solid #2a1d31;
+      border-radius:8px;
+      background:var(--cream);
+      color:var(--text-dark);
+      box-shadow:inset 0 0 0 3px var(--cream-hi),5px 5px 0 #6b4548;
+      cursor:pointer;
+      text-align:left;
+      transition:transform .06s steps(2,end),filter .06s steps(2,end);
+      overflow:hidden;
+    }
+
+    .question-btn::after {
+      content:"";
+      position:absolute;
+      pointer-events:none;
+    }
+
+    .question-btn:hover,
+    .question-btn:focus-visible {
+      outline:0;
+      filter:brightness(1.07);
+      transform:translate(-3px,-3px);
+    }
+
+    .question-btn:active { transform:translate(3px,3px); }
+
+    .question-btn.active {
+      background:#fff0c9;
+      border-color:#58394f;
+      box-shadow:inset 0 0 0 3px #fff8dc,5px 5px 0 #72434e;
+    }
+
+    .q-number {
+      align-self:stretch;
+      display:grid;
+      place-items:center;
+      color:#fff4cf;
+      background:var(--blue);
+      border-right:4px solid #2a1d31;
+      border-radius:4px 0 0 4px;
+      font-size:28px;
+      text-shadow:3px 3px 0 rgba(0,0,0,.3);
+      box-shadow:inset 0 4px 0 rgba(255,255,255,.16);
+    }
+
+    .question-btn:nth-child(2) .q-number { background:var(--green); }
+    .question-btn:nth-child(3) .q-number { background:var(--lilac); }
+    .question-btn:nth-child(4) .q-number { background:var(--pink); }
+
+    .q-label {
+      padding:0 22px;
+      font-size:28px;
+      font-weight:700;
+      line-height:1;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      text-shadow:2px 2px 0 rgba(255,255,255,.24);
+    }
+
+    .q-icon {
+      width:46px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      justify-self:end;
+      color:var(--cream);
+      background:#352740;
+      border:3px solid #211724;
+      border-radius:6px;
+      box-shadow:inset 0 0 0 2px #5a4668,3px 3px 0 #2a1d31;
+      font-size:20px;
+    }
+
+    .swipe {
+      position:absolute;
+      inset:0;
+      z-index:40;
+      pointer-events:none;
+      transform:translateX(-105%);
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.05) 4px,transparent 4px) 0 0/16px 16px,
+        #4d385f;
+      border-right:12px solid var(--yellow);
+      box-shadow:inset -9px 0 0 #7e5b92;
+    }
+
+    .swipe::before {
+      content:"RYU TANAKA";
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      color:var(--yellow-hi);
+      font-size:38px;
+      letter-spacing:4px;
+      text-shadow:4px 4px 0 #241a2b;
+    }
+
+    .swipe.play { animation:pixelSwipe 560ms steps(10,end) both; }
+
+    @keyframes pixelSwipe {
+      0% { transform:translateX(-105%); }
+      45% { transform:translateX(0); }
+      55% { transform:translateX(0); }
+      100% { transform:translateX(105%); }
+    }
+
+
+    /* True mobile layout: reflows the landscape UI into a portrait game panel. */
+    @media (max-width:760px) {
+      html, body {
+        width:100%;
+        min-height:100%;
+      }
+
+      body {
+        min-height:100dvh;
+        padding:8px;
+        align-items:flex-start;
+        justify-content:center;
+        overflow:auto;
+      }
+
+      .viewport {
+        width:100% !important;
+        height:auto !important;
+        max-width:460px;
+      }
+
+      .canvas {
+        position:relative;
+        left:auto;
+        top:auto;
+        width:100%;
+        height:calc(100dvh - 16px);
+        min-height:640px;
+        max-height:900px;
+        transform:none !important;
+        transform-origin:center center;
+        border-radius:10px;
+        box-shadow:
+          inset 0 0 0 3px #4c3a54,
+          inset 0 0 0 6px #211926,
+          6px 6px 0 #100c13;
+      }
+
+      .topbar {
+        height:52px;
+        padding:0 12px;
+        border-bottom-width:4px;
+      }
+
+      .brand {
+        font-size:20px;
+        letter-spacing:1px;
+      }
+
+      .tokyo-clock {
+        font-size:14px;
+        letter-spacing:.4px;
+        text-align:right;
+      }
+
+      .global-tooltip {
+        top:6px;
+        min-width:110px;
+        padding:5px 9px;
+        border-width:3px;
+        font-size:14px;
+        box-shadow:3px 3px 0 #120d16;
+      }
+
+      .workspace {
+        height:calc(100% - 52px);
+        padding:6px;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        background:
+          linear-gradient(90deg,rgba(255,255,255,.035) 3px,transparent 3px) 0 0/12px 12px,
+          linear-gradient(rgba(255,255,255,.025) 3px,transparent 3px) 0 0/12px 12px,
+          #4e3e58;
+      }
+
+      .sidebar {
+        display:none;
+      }
+
+      .mobile-link-dock {
+        display:grid;
+        grid-template-rows:repeat(2,1fr);
+        gap:8px;
+        min-width:0;
+        min-height:0;
+        align-self:stretch;
+      }
+
+      .mobile-link-dock .site-link {
+        width:100%;
+        height:100%;
+        min-height:0;
+        border-width:3px;
+        border-radius:6px;
+        box-shadow:inset 0 0 0 3px #78638d,4px 4px 0 #211724;
+      }
+
+      .mobile-link-dock .site-link:first-child {
+        box-shadow:inset 0 0 0 3px var(--yellow-hi),4px 4px 0 #211724;
+      }
+
+      .mobile-link-dock .site-link .glyph {
+        font-size:16px;
+        writing-mode:vertical-rl;
+        transform:rotate(180deg);
+        letter-spacing:1px;
+      }
+
+      .main-area {
+        width:100%;
+        height:auto;
+        min-height:0;
+        flex:1 1 auto;
+      }
+
+      .tabs {
+        left:8px;
+        height:42px;
+      }
+
+      .tab {
+        height:42px;
+        min-width:150px;
+        padding:0 14px;
+        gap:7px;
+        border-width:3px;
+        border-bottom:0;
+        border-radius:7px 7px 0 0;
+        box-shadow:inset 0 0 0 3px var(--yellow-hi),4px 0 0 #211724;
+        font-size:18px;
+        letter-spacing:.5px;
+      }
+
+      .window-actions {
+        right:4px;
+      }
+
+      .window-btn {
+        width:46px;
+        height:40px;
+        border-width:3px;
+        border-radius:6px;
+        box-shadow:inset 0 0 0 3px #765f89,3px 3px 0 #201724;
+        font-size:22px;
+      }
+
+      .panel {
+        top:38px;
+        width:100%;
+        height:calc(100% - 38px);
+        padding:12px 14px;
+        grid-template-rows:minmax(0,1fr) minmax(188px,34%);
+        gap:12px;
+        border-width:4px;
+        border-radius:8px;
+        background:
+          linear-gradient(90deg,rgba(255,255,255,.08) 3px,transparent 3px) 0 0/18px 18px,
+          var(--yellow);
+        box-shadow:
+          inset 0 0 0 4px var(--yellow-hi),
+          inset 0 0 0 8px var(--yellow-low),
+          5px 5px 0 #2d2134;
+      }
+
+      .panel-bolt {
+        display:none;
+      }
+
+      .top-content {
+        min-height:0;
+        display:grid;
+        grid-template-columns:56px minmax(0,1fr);
+        grid-template-rows:auto minmax(0,1fr);
+        column-gap:9px;
+        row-gap:9px;
+      }
+
+      .portrait-wrap {
+        grid-column:2;
+        grid-row:1;
+        width:100%;
+        height:auto;
+        min-height:0;
+        display:grid;
+        grid-template-rows:auto 26px;
+        gap:5px;
+      }
+
+      .portrait-frame {
+        width:100%;
+        aspect-ratio:365 / 235;
+        height:auto;
+        min-height:0;
+        border-width:4px;
+        border-radius:7px;
+        box-shadow:inset 0 0 0 4px #6b557b,4px 4px 0 #9f684b;
+      }
+
+      .mobile-link-dock {
+        grid-column:1;
+        grid-row:1;
+      }
+
+      .character {
+        transform:scale(1.08) translateY(2px);
+      }
+
+      .character.switching {
+        transform:scale(1.04) translateY(2px);
+      }
+
+      .meter {
+        grid-template-columns:46px 1fr;
+        gap:5px;
+      }
+
+      .mood-face {
+        border-width:3px;
+        border-radius:5px;
+        box-shadow:inset 0 0 0 3px #8a6da4,3px 3px 0 #38273e;
+        font-size:16px;
+      }
+
+      .meter-track {
+        gap:3px;
+        padding:4px;
+        border-width:3px;
+        border-radius:5px;
+        box-shadow:inset 0 0 0 2px #755987,3px 3px 0 #38273e;
+      }
+
+      .dialogue-side {
+        grid-column:1 / -1;
+        grid-row:2;
+        width:100%;
+        height:auto;
+        min-height:0;
+        grid-template-rows:38px minmax(0,1fr);
+        gap:6px;
+      }
+
+      .name-row {
+        grid-template-columns:1fr;
+        gap:0;
+      }
+
+      .nameplate {
+        min-height:38px;
+        padding:0 12px;
+        border-width:4px;
+        border-radius:6px;
+        box-shadow:inset 0 0 0 3px #805e98,3px 3px 0 #9b684c;
+        font-size:20px;
+        letter-spacing:2px;
+      }
+
+      .badge-row {
+        display:none;
+      }
+
+      .dialogue-box {
+        min-height:0;
+        padding:10px 72px 10px 12px;
+        border-width:4px;
+        border-radius:6px;
+        box-shadow:inset 0 0 0 3px #44334c,3px 3px 0 #b27a4d;
+        overflow:auto;
+      }
+
+      .dialogue-text {
+        max-width:none;
+        font-size:17px;
+        line-height:1.16;
+        letter-spacing:.15px;
+        text-shadow:1px 1px 0 #17111b;
+      }
+
+      .dialogue-question {
+        margin-top:5px;
+        font-size:11px;
+      }
+
+      .dialogue-nav {
+        right:7px;
+        bottom:7px;
+        gap:4px;
+      }
+
+      .page-count {
+        min-width:28px;
+        font-size:11px;
+      }
+
+      .next-btn {
+        min-width:58px;
+        height:31px;
+        padding:0 6px;
+        border-width:3px;
+        border-radius:5px;
+        box-shadow:inset 0 0 0 2px var(--yellow-hi),3px 3px 0 #1e1522;
+        font-size:12px;
+      }
+
+      .questions {
+        min-height:0;
+        grid-template-rows:repeat(4,minmax(42px,1fr));
+        gap:7px;
+      }
+
+      .question-btn {
+        min-height:0;
+        grid-template-columns:44px 1fr 38px;
+        padding-right:6px;
+        border-width:3px;
+        border-radius:6px;
+        box-shadow:inset 0 0 0 2px var(--cream-hi),4px 4px 0 #6b4548;
+      }
+
+      .question-btn:hover,
+      .question-btn:focus-visible {
+        transform:translate(-2px,-2px);
+      }
+
+      .question-btn:active {
+        transform:translate(2px,2px);
+      }
+
+      .q-number {
+        border-right-width:3px;
+        border-radius:3px 0 0 3px;
+        font-size:20px;
+        text-shadow:2px 2px 0 rgba(0,0,0,.3);
+      }
+
+      .q-label {
+        padding:0 9px;
+        font-size:18px;
+        line-height:1.02;
+        white-space:normal;
+        text-overflow:clip;
+      }
+
+      .q-icon {
+        width:31px;
+        height:26px;
+        border-width:2px;
+        border-radius:4px;
+        box-shadow:inset 0 0 0 2px #5a4668,2px 2px 0 #2a1d31;
+        font-size:14px;
+      }
+
+      .swipe {
+        border-right-width:8px;
+      }
+
+      .swipe::before {
+        font-size:25px;
+        letter-spacing:2px;
+        text-align:center;
+      }
+    }
+
+    @media (max-width:760px) and (max-height:700px) {
+      .canvas {
+        min-height:600px;
+      }
+
+      .topbar {
+        height:46px;
+      }
+
+      .brand {
+        font-size:18px;
+      }
+
+      .tokyo-clock {
+        font-size:12px;
+      }
+
+      .workspace {
+        height:calc(100% - 46px);
+        gap:6px;
+      }
+
+      .mobile-link-dock {
+        gap:6px;
+      }
+
+      .mobile-link-dock .site-link .glyph {
+        font-size:14px;
+      }
+
+      .panel {
+        grid-template-rows:minmax(0,1fr) minmax(170px,33%);
+        gap:9px;
+        padding:10px 12px;
+      }
+
+      .top-content {
+        grid-template-columns:52px minmax(0,1fr);
+        grid-template-rows:auto minmax(0,1fr);
+        column-gap:7px;
+        row-gap:7px;
+      }
+
+      .q-label {
+        font-size:16px;
+      }
+
+      .dialogue-text {
+        font-size:15px;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      *, *::before, *::after {
+        animation-duration:.01ms !important;
+        transition-duration:.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport" id="viewport">
+    <main class="canvas" id="canvas" aria-label="Interactive pixel dialogue system">
+      <div class="global-tooltip" id="globalTooltip" role="status"></div>
+
+      <header class="topbar">
+        <div class="brand">GET-TO-KNOW-ME</div>
+        <div class="tokyo-clock">
+          <span id="tokyoDate">TOKYO · THU 20 AUG 2026</span>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <aside class="sidebar" aria-label="External links">
+          <div class="rail-cap top" aria-hidden="true">▲</div>
+          <nav class="link-stack" id="linkStack"></nav>
+          <div class="rail-cap bottom" aria-hidden="true">▼</div>
+        </aside>
+
+        <section class="main-area">
+          <div class="tabs" aria-label="Dialogue interface tab">
+            <div class="tab">▣ DIALOGUE</div>
+          </div>
+
+          <div class="window-actions">
+            <button class="window-btn" id="resetButton" type="button" aria-label="Reset dialogue">×</button>
+          </div>
+
+          <section class="panel">
+            <span class="panel-bolt a" aria-hidden="true"></span>
+            <span class="panel-bolt b" aria-hidden="true"></span>
+
+            <div class="top-content">
+              <nav class="mobile-link-dock" id="mobileLinkDock" aria-label="Mobile external links"></nav>
+
+              <div class="portrait-wrap">
+                <div class="portrait-frame">
+                  <img class="scene-bg" src="assets/background.gif" alt="" aria-hidden="true" />
+                  <img id="character" class="character" src="assets/idle.gif" alt="Ryu character idle animation" />
+                </div>
+
+                <div class="meter" aria-hidden="true">
+                  <div class="mood-face">☻</div>
+                  <div class="meter-track"><i></i><i></i><i></i><i></i></div>
+                </div>
+              </div>
+
+              <div class="dialogue-side">
+                <div class="name-row">
+                  <div class="nameplate">RYU TANAKA</div>
+                  <div class="badge-row" aria-hidden="true">
+                    <div class="shield">RT</div>
+                    <div class="badge-bars"><i></i><i></i><i></i><i></i><i></i></div>
+                  </div>
+                </div>
+
+                <div class="dialogue-box">
+                  <p class="dialogue-text" id="dialogueText" aria-live="polite">HEY — WELCOME TO MY DIALOGUE SYSTEM.
+PICK A QUESTION BELOW TO GET STARTED.</p>
+                  <span class="dialogue-question" id="dialogueQuestion">Choose a response.</span>
+
+                  <div class="dialogue-nav">
+                    <span class="page-count" id="pageCount"></span>
+                    <button class="next-btn" id="nextButton" type="button" aria-label="More dialogue">MORE ▼</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="questions" id="questions" aria-label="Interview questions"></div>
+          </section>
+        </section>
+      </div>
+
+      <div class="swipe" id="swipe" aria-hidden="true"></div>
+    </main>
+  </div>
+
+  <script>
+    const BASE_WIDTH = 1420;
+    const BASE_HEIGHT = 800;
+
+    const externalLinks = [
+      { label:"Portfolio", glyph:"WEB", href:"https://ryutanaka.com/" },
+      { label:"LinkedIn", glyph:"IN", href:"https://www.linkedin.com/in/tanakaryu/" }
+    ];
+
+    const dialogue = [
+      {
+        question:"Why would you want to work with us?",
+        pages:[
+          "What excites me about this role is that it sits right at the intersection of creativity, design and technology. My work already spans visual design, motion, 3D and interactive experiences, and I’ve been bringing AI and generative tools directly into how I explore and make ideas.",
+          "I also like that Google expects creatives to show, not just tell — to prototype early, test unconventional ideas and get hands-on with the work. That way of thinking is very natural to me.",
+          "The opportunity to take 0-to-1 ideas and work across marketing, engineering, agencies and technical partners is especially appealing. I enjoy finding the balance between creative ambition and what can actually be built and shipped.",
+          "I’m also excited by the scale — using AI not just to make individual assets, but to build better creative workflows, playbooks and systems that help teams move faster while keeping the work thoughtful and human."
+        ],
+        gif:"assets/reaction-awesome.gif"
+      },
+      {
+        question:"Where are you based?",
+        pages:[
+          "Tokyo, Japan — surrounded by plenty of good food, visual inspiration and far too many sub cultures and hobbies to get into."
+        ],
+        gif:"assets/reaction-tokyo.gif"
+      },
+      {
+        question:"What do you like to do with your time?",
+        pages:[
+          "Mostly making things I'm curious about. I experiment with 3D, motion, interactive design and occasionally work on my own game.",
+          "When I’m away from the screen, I’m usually spending time with my family or making camp fire."
+        ],
+        gif:"assets/reaction-make.gif"
+      },
+      {
+        question:"Tell us a little about yourself.",
+        pages:[
+          "I’m a motion-led designer with 8+ years across animation, 3D, branding and film.",
+          "I started out studying architecture, somehow ended up making things move, and never really looked back.",
+          "I’m a curious person by nature, love learning new tools, and probably spend more time than necessary fixing tiny details nobody else notices."
+        ],
+        gif:"assets/reaction-about.gif"
+      }
+    ];
+
+    const idleGif = "assets/idle.gif";
+    const viewport = document.getElementById("viewport");
+    const canvas = document.getElementById("canvas");
+    const linkStack = document.getElementById("linkStack");
+    const mobileLinkDock = document.getElementById("mobileLinkDock");
+    const globalTooltip = document.getElementById("globalTooltip");
+    const questions = document.getElementById("questions");
+    const dialogueText = document.getElementById("dialogueText");
+    const dialogueQuestion = document.getElementById("dialogueQuestion");
+    const character = document.getElementById("character");
+    const nextButton = document.getElementById("nextButton");
+    const pageCount = document.getElementById("pageCount");
+    const resetButton = document.getElementById("resetButton");
+    const swipe = document.getElementById("swipe");
+    const tokyoDate = document.getElementById("tokyoDate");
+
+    let activeIndex = null;
+    let activePage = 0;
+    let transitioning = false;
+
+    function fitCanvas() {
+      const isMobile = window.matchMedia("(max-width: 760px)").matches;
+
+      if (isMobile) {
+        viewport.style.width = "100%";
+        viewport.style.height = "auto";
+        canvas.style.transform = "none";
+        return;
+      }
+
+      const availableWidth = Math.max(280, window.innerWidth - 32);
+      const availableHeight = Math.max(240, window.innerHeight - 32);
+      const scale = Math.min(availableWidth / BASE_WIDTH, availableHeight / BASE_HEIGHT, 1);
+
+      viewport.style.width = `${BASE_WIDTH * scale}px`;
+      viewport.style.height = `${BASE_HEIGHT * scale}px`;
+      canvas.style.transform = `scale(${scale})`;
+    }
+
+    function updateTokyoDate() {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone:"Asia/Tokyo",
+        weekday:"short",
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
+      }).formatToParts(now);
+
+      const pick = type => parts.find(part => part.type === type)?.value || "";
+      tokyoDate.textContent = `TOKYO · ${pick("weekday").toUpperCase()} ${pick("day")} ${pick("month").toUpperCase()} ${pick("year")}`;
+    }
+
+    function runSwipe(callback) {
+      if (transitioning) return;
+      transitioning = true;
+      swipe.classList.remove("play");
+      void swipe.offsetWidth;
+      swipe.classList.add("play");
+
+      window.setTimeout(callback,255);
+      window.setTimeout(() => {
+        swipe.classList.remove("play");
+        transitioning = false;
+      },580);
+    }
+
+    function switchCharacter(src, alt) {
+      character.classList.add("switching");
+      window.setTimeout(() => {
+        character.src = src;
+        character.alt = alt;
+        character.classList.remove("switching");
+      },90);
+    }
+
+    function showTooltip(label) {
+      globalTooltip.textContent = label;
+      globalTooltip.classList.add("show");
+    }
+
+    function hideTooltip() {
+      globalTooltip.classList.remove("show");
+    }
+
+    function createExternalLink(item) {
+      const link = document.createElement("a");
+      link.className = "site-link";
+      link.href = item.href;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.setAttribute("aria-label",item.label);
+      link.innerHTML = `<span class="glyph">${item.glyph}</span>`;
+
+      link.addEventListener("mouseenter",() => showTooltip(item.label));
+      link.addEventListener("mouseleave",hideTooltip);
+      link.addEventListener("focus",() => showTooltip(item.label));
+      link.addEventListener("blur",hideTooltip);
+
+      return link;
+    }
+
+    function renderLinks() {
+      linkStack.innerHTML = "";
+      mobileLinkDock.innerHTML = "";
+
+      externalLinks.forEach(item => {
+        linkStack.appendChild(createExternalLink(item));
+        mobileLinkDock.appendChild(createExternalLink(item));
+      });
+    }
+
+    function renderQuestions() {
+      questions.innerHTML = "";
+
+      dialogue.forEach((item,index) => {
+        const button = document.createElement("button");
+        button.className = "question-btn";
+        button.type = "button";
+        button.innerHTML = `
+          <span class="q-number">${index + 1}</span>
+          <span class="q-label">${item.question}</span>
+          <span class="q-icon">${["⌕","◆","↗","★"][index]}</span>
+        `;
+        button.addEventListener("click",() => selectQuestion(index));
+        questions.appendChild(button);
+      });
+
+      updateQuestionHighlight();
+    }
+
+    function updateQuestionHighlight() {
+      [...questions.children].forEach((button,index) => {
+        button.classList.toggle("active",index === activeIndex);
+      });
+    }
+
+    function selectQuestion(index) {
+      runSwipe(() => {
+        activeIndex = index;
+        activePage = 0;
+        updateQuestionHighlight();
+        switchCharacter(dialogue[index].gif,`Ryu reaction for: ${dialogue[index].question}`);
+        updateDialogue();
+      });
+    }
+
+    function updateDialogue() {
+      if (activeIndex === null) {
+        dialogueText.textContent = "HEY — WELCOME TO MY DIALOGUE SYSTEM.\nPICK A QUESTION BELOW TO GET STARTED.";
+        dialogueQuestion.textContent = "Choose a response.";
+        pageCount.textContent = "";
+        nextButton.textContent = "MORE ▼";
+        nextButton.disabled = true;
+        nextButton.setAttribute("aria-label","Choose a question below");
+        return;
+      }
+
+      const item = dialogue[activeIndex];
+      dialogueText.textContent = item.pages[activePage];
+      dialogueQuestion.textContent = item.question;
+      pageCount.textContent = item.pages.length > 1 ? `${activePage + 1}/${item.pages.length}` : "";
+      nextButton.disabled = false;
+
+      if (activePage < item.pages.length - 1) {
+        nextButton.textContent = "MORE ▼";
+        nextButton.setAttribute("aria-label","More dialogue");
+      } else {
+        nextButton.textContent = "BACK ↺";
+        nextButton.setAttribute("aria-label","Return to idle dialogue");
+      }
+    }
+
+    function resetDialogue() {
+      activeIndex = null;
+      activePage = 0;
+      updateQuestionHighlight();
+      switchCharacter(idleGif,"Ryu character idle animation");
+      updateDialogue();
+    }
+
+    nextButton.addEventListener("click",() => {
+      if (activeIndex === null) return;
+
+      const item = dialogue[activeIndex];
+      if (activePage < item.pages.length - 1) {
+        activePage += 1;
+        updateDialogue();
+      } else {
+        resetDialogue();
+      }
+    });
+
+    resetButton.addEventListener("click",resetDialogue);
+
+    document.addEventListener("keydown",event => {
+      if (event.key === "Escape" && activeIndex !== null && !transitioning) resetDialogue();
+      if ((event.key === "Enter" || event.key === "ArrowRight") && activeIndex !== null && !transitioning) nextButton.click();
+    });
+
+    window.addEventListener("resize",fitCanvas);
+
+    renderLinks();
+    renderQuestions();
+    updateTokyoDate();
+    updateDialogue();
+    fitCanvas();
+    window.setInterval(updateTokyoDate,60_000);
+  </script>
+</body>
+</html>
